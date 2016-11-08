@@ -8,16 +8,16 @@ import java.io.Serializable;
  */
 
 public class Heartbeat implements Serializable{
-    private final int TCPPort;
+    private final int port;
     private final String name;
     
     public Heartbeat(int p, String n){
-        this.TCPPort = p;
+        this.port = p;
         this.name = n;
     }
     
-    public int getTCPPort(){
-        return TCPPort;
+    public int getPort(){
+        return port;
     }
     
     public String getName(){

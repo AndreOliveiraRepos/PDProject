@@ -15,7 +15,7 @@ public class FileServer {
     private final InetAddress directoryServerAddr;
     private final int directoryServerPort;
     
-    private ServerSocket serverSocket;
+    private ServerSocket serverSocket;  //TCP Server
     private static HeartbeatSender hbSender;
     
     public FileServer(String n, InetAddress dirAddr, int dirPort){
@@ -53,8 +53,7 @@ public class FileServer {
             System.out.println("Destino desconhecido:\n\t"+ex);
         } catch (InterruptedException ex) {
             System.out.println("Erro na thread UDP:\n\t"+ex);
-        }
-        
+        }   
     }
     
     public void beginHeartbeat(){

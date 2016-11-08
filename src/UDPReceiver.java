@@ -15,7 +15,7 @@ import java.net.UnknownHostException;
  */
 
 public class UDPReceiver extends Thread{
-    public static final int MAX_SIZE = 10000;
+    public static final int MAX_SIZE = 1000;
     DatagramSocket socket;
     
     public UDPReceiver(){
@@ -52,9 +52,8 @@ public class UDPReceiver extends Thread{
                 if (obj instanceof Heartbeat){
                     heartbeat = (Heartbeat)obj;
                     System.out.println("Heatbeat data: \n\t TCPServerName: "+heartbeat.getName()
-                                        + "\n\t TCPServerPort: "+heartbeat.getTCPPort());
-                }
-                
+                                        + "\n\t TCPServerPort: "+heartbeat.getPort());
+                }   
             }
             
         }catch(UnknownHostException e){
