@@ -1,31 +1,89 @@
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+class AtendeCliente extends Thread {
+    
+    public static final int TIMEOUT = 5;
+    public static final int MAX_SIZE = 4000;
+    
+    Socket socketToClient;
+    int myId;
+
+    public AtendeCliente(Socket s, int id){
+        socketToClient = s;
+        myId = id;
+    }
+    
+    @Override
+    public void run(){
+        BufferedReader in;
+        OutputStream out;
+        
+        byte[]fileChunk = new byte[MAX_SIZE];
+        int nbytes;
+        
+        String clientRequest = null;
+        String resposta = null;
+        
+        try{
+            socketToClient.setSoTimeout(TIMEOUT*1000);
+            
+            // Streams de entrada e saída via TCP
+            in = new BufferedReader(
+                    new InputStreamReader(
+                            socketToClient.getInputStream()
+                    )
+            );
+            out = socketToClient.getOutputStream();
+            
+            clientRequest = in.readLine();
+            System.out.println("Pedido recebido: "+clientRequest);
+            
+            // Enviar resposta ao cliente
+            resposta = "O servidor recebeu o pedido" + clientRequest;
+            out.write(resposta.getBytes(),0,resposta.length());
+            out.flush();
+            
+        }catch(IOException e){
+            System.out.println("Ocorreu a excepcao de E/S: \n\t" + e);                       
+        }
+        
+        try{
+             socketToClient.close();
+        } catch (IOException ex) {}
+    }
+}
 
 public class FileServer {
     
-    private final String name;
-    private final InetAddress directoryServerAddr;
-    private final int directoryServerPort;
+    private static String name;
+    private static InetAddress directoryServerAddr;
+    private static int directoryServerPort;
     
-    private ServerSocket serverSocket;  //TCP Server
     private static HeartbeatSender hbSender;
+    private static boolean online;
     
-    public FileServer(String n, InetAddress dirAddr, int dirPort){
-        this.name = n;
-        this.directoryServerAddr = dirAddr;
-        this.directoryServerPort = dirPort;
+    private int threadId;
+    private static ServerSocket serverSocket;  //TCP Server
+    //directory
+    
+    public FileServer(String n, InetAddress dirAddr, int dirPort) {
+        
+        directoryServerAddr = dirAddr;
+        directoryServerPort = dirPort;
+        threadId = 0;
+        name = n;
+        online = true;
         
         try {
             //Gera porto automático TCP
-            serverSocket = new ServerSocket(0);
+            serverSocket = new ServerSocket(7001);
         } catch (IOException ex) {
             System.out.println("Ocorreu um erro no acesso ao socket:\n\t"+ex);
         }
@@ -45,7 +103,8 @@ public class FileServer {
             );
             
             //Inicializar heartbeat/Packets UDP
-            fserver.beginHeartbeat();
+            beginHeartbeat();
+            fserver.processRequests();
             //Esperar que a thread termine
             hbSender.join();
             
@@ -56,13 +115,38 @@ public class FileServer {
         }   
     }
     
-    public void beginHeartbeat(){
+    public static void beginHeartbeat(){
         //Thread que fica encarregada de enviar o heartbeat de 30 em 30 segs
         hbSender = new HeartbeatSender(
-                new Heartbeat(serverSocket.getLocalPort(),this.name),
+                new Heartbeat(serverSocket.getLocalPort(),name),
                 directoryServerAddr, directoryServerPort
         );
         hbSender.start();
+    }
+    
+    public void goOffline(){
+        online = false;
+    }
+    
+    public void processRequests(){
+        Socket socketToClient;
+        
+        // Verificar se o socket do servidor foi inicializado
+        if (serverSocket == null) return;
+        
+        System.out.println(name +" Online!");
+        
+        while(online){
+            try {
+                socketToClient = serverSocket.accept();
+                (new AtendeCliente(socketToClient,threadId++)).start();
+            } catch (IOException ex) {
+            }finally{
+            try {
+                serverSocket.close();
+            } catch (IOException e) {}
+        }
+        }  
     }
     
     //arraylist para guardar clientes ligados?

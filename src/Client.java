@@ -1,23 +1,25 @@
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 public class Client {
-    //implementar a classe responsável pelo envio do heartbeat ao serviço de directoria
-    //socket tcp
+    public static final int MAX_SIZE = 4000;
+    public static final int TIMEOUT = 5;
     
     private final InetAddress directoryServerAddr;
     private final int directoryServerPort;
     private String name;
     
+    private static Socket socketToServer; //Socket TCP
     private static DatagramSocket socket; //Socket UDP
     private static HeartbeatSender hbSender;
     
@@ -41,11 +43,13 @@ public class Client {
                     Integer.parseInt(args[1])
             );
             
-            //Socket UDP para receber datagramas
+            //Socket UDP para receber datagramas (usado para chat) ?
             socket = new DatagramSocket(); 
             
             //Inicializar heartbeat/Packets UDP
             client.beginHeartbeat();
+            //teste TCP
+            client.connectToServer(InetAddress.getByName("127.0.0.1"), 7001);
             
             //Esperar que a thread termine
             hbSender.join();
@@ -66,5 +70,45 @@ public class Client {
                 directoryServerAddr, directoryServerPort
         );
         hbSender.start();
+    }
+    
+    public void connectToServer(InetAddress servAddr, int servPort){
+        
+        PrintWriter pout;
+        InputStream in;
+        
+        //int nbytes;
+        //byte []fileChunck = new byte[MAX_SIZE];
+        try {
+            socketToServer = new Socket(servAddr, servPort);
+            socketToServer.setSoTimeout(TIMEOUT*1000);
+            
+            in = socketToServer.getInputStream();
+            pout = new PrintWriter(socketToServer.getOutputStream(), true);
+            
+            // Enviar um pedido ao servidor de ficheiros (TCP)
+            pout.println("meuRequest1");
+            pout.flush();
+
+            // Receber a resposta do servidor (TCP)
+            
+            //DEBUG - ver se o tcp está funcional
+            String resposta;
+            BufferedReader in_ = new BufferedReader(new InputStreamReader(in));
+            
+            resposta = in_.readLine();  
+            System.out.println(resposta);
+            // fim Debug
+            
+        } catch(IOException e){
+            System.out.println("Ocorreu um erro no acesso ao socket" + ":\n\t"+e);
+        }finally{
+            
+            if(socketToServer != null){
+                try {
+                    socketToServer.close();
+                } catch (IOException ex) {}
+            } 
+        }     
     }
 }
