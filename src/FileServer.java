@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 class AtendeCliente extends Thread {
     
@@ -71,6 +72,8 @@ public class FileServer {
     
     private int threadId;
     private static ServerSocket serverSocket;  //TCP Server
+    
+    private static ArrayList connectedClients;
     //directory
     
     public FileServer(String n, InetAddress dirAddr, int dirPort) {
@@ -141,11 +144,11 @@ public class FileServer {
                 socketToClient = serverSocket.accept();
                 (new AtendeCliente(socketToClient,threadId++)).start();
             } catch (IOException ex) {
-            }finally{
-            try {
-                serverSocket.close();
-            } catch (IOException e) {}
-        }
+            } finally{
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {}
+            }
         }  
     }
     

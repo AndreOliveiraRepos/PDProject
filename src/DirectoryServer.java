@@ -10,13 +10,16 @@ import java.util.ArrayList;
 
 public class DirectoryServer {
     
-    private static UDPReceiver udpReceiver;
+    private static UdpReceiver udpReceiver;
     
     private static ArrayList connectedServers;
-    private static ArrayList connectedClients;
     
     public static void main(String[] args) {
-        udpReceiver = new UDPReceiver();
+        startUdpListener();
+    }
+    
+    public static void startUdpListener(){
+        udpReceiver = new UdpReceiver();
         udpReceiver.start();
     }
 }
