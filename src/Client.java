@@ -162,6 +162,10 @@ public class Client {
             // Receber a resposta do servidor (TCP)
             
             //DEBUG - ver se o tcp está funcional
+            /* O servidor reve de devolver respostas baseadas nos comandos a ele enviados,
+            deve também ser possível receber ficheiros nbytes = in.read(fileChunk);
+            ver os exemplos do marinho
+            */
             //String resposta;
             BufferedReader in_ = new BufferedReader(new InputStreamReader(in));
             
