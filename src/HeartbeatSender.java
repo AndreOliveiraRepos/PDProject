@@ -21,7 +21,7 @@ public class HeartbeatSender extends Thread{
     private DatagramSocket socket;
     private DatagramPacket packet;
     private static final int TIMEOUT_MS = 10*1000;
-    private static final int HEARTBEAT_INTERVAL_MS = 2*1000;
+    private static final int HEARTBEAT_INTERVAL_MS = 5*1000;
     
     private ByteArrayOutputStream bOut;
     private ObjectOutputStream out;

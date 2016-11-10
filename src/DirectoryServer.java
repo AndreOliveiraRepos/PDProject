@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class DirectoryServer {
     
-    private static UdpReceiver udpReceiver;
+    private static UdpListener udpReceiver;
     
     private static ArrayList connectedServers;
     
@@ -19,7 +19,7 @@ public class DirectoryServer {
     }
     
     public static void startUdpListener(){
-        udpReceiver = new UdpReceiver();
+        udpReceiver = new UdpListener();
         udpReceiver.start();
     }
 }

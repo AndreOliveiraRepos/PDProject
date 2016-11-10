@@ -10,7 +10,6 @@ import java.util.ArrayList;
 
 class AtendeCliente extends Thread {
     
-    public static final int TIMEOUT = 5;
     public static final int MAX_SIZE = 4000;
     
     Socket socketToClient;
@@ -26,15 +25,13 @@ class AtendeCliente extends Thread {
         BufferedReader in;
         OutputStream out;
         
-        byte[]fileChunk = new byte[MAX_SIZE];
-        int nbytes;
+        /*byte[]fileChunk = new byte[MAX_SIZE];
+        int nbytes;*/
         
         String clientRequest = null;
         String resposta = null;
         
-        try{
-            socketToClient.setSoTimeout(TIMEOUT*1000);
-            
+        try{            
             // Streams de entrada e saída via TCP
             in = new BufferedReader(
                     new InputStreamReader(
