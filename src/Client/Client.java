@@ -1,4 +1,8 @@
+package Client;
 
+import common.Msg;
+import common.Heartbeat;
+import common.HeartbeatSender;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,8 +14,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +29,7 @@ public class Client {
     
     private static Socket socketToServer;       //Socket TCP
     private static DatagramSocket socketUDP;    //Socket UDP
-    private static UdpListener udpListener;
+    private static UdpClientListener udpListener;
     private static HeartbeatSender hbSender;
         
     public static void main(String[] args) {
@@ -111,7 +113,7 @@ public class Client {
      * Inicializa a classe encarregada por receber packets UDP.
      */
     public static void startUdpListener(){
-        udpListener = new UdpListener(socketUDP);
+        udpListener = new UdpClientListener(socketUDP);
         udpListener.start();
     }
     

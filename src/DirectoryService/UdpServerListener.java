@@ -1,4 +1,7 @@
+package DirectoryService;
 
+import common.Heartbeat;
+import common.Msg;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,7 +19,7 @@ import java.net.UnknownHostException;
  * and open the template in the editor.
  */
 
-public class UdpListener extends Thread{
+public class UdpServerListener extends Thread{
     public static final int MAX_SIZE = 1000;
     public static final String LIST = "LIST";
     DatagramSocket socket;
@@ -24,7 +27,7 @@ public class UdpListener extends Thread{
     /**
      * Inicializa o DatagramSocket caso este não tenha sido passado pelo construtor
      */
-    public UdpListener(){
+    public UdpServerListener(){
         try {
             socket = new DatagramSocket(); //Não pode ser 6001, deve de ser () ... automático.
         } catch(SocketException e){
@@ -34,7 +37,7 @@ public class UdpListener extends Thread{
         }
     }
     
-    public UdpListener(DatagramSocket s){
+    public UdpServerListener(DatagramSocket s){
             socket = s;
     }
     

@@ -1,3 +1,5 @@
+package DirectoryService;
+
 
 import java.util.ArrayList;
 
@@ -10,7 +12,7 @@ import java.util.ArrayList;
 
 public class DirectoryServer {
     
-    private static UdpListener udpReceiver;
+    private static UdpServerListener udpReceiver;
     
     private static ArrayList connectedServers;
     
@@ -19,7 +21,7 @@ public class DirectoryServer {
     }
     
     public static void startUdpListener(){
-        udpReceiver = new UdpListener();
+        udpReceiver = new UdpServerListener();
         udpReceiver.start();
     }
 }
