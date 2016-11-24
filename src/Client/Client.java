@@ -22,20 +22,16 @@ public class Client {
     public static final int MAX_SIZE = 4000;
     public static final int TIMEOUT = 5;
     public static final String EXIT = "EXIT";
-    
-    private static InetAddress directoryServerAddr;
-    private static int directoryServerPort;
+   
     private static String name;
     
     private static Socket socketToServer;       //Socket TCP
     private static DatagramSocket socketUDP;    //Socket UDP
-    private static UdpClientListener udpListener;
+    private static ClientUdpHandler udpHandler;
     private static HeartbeatSender hbSender;
         
     public static void main(String[] args) {
         String msg;
-        DatagramPacket packet;
-        DatagramSocket socket;
         
         if(args.length != 2){
             System.out.println("Sintaxe: java Client dirAdress dirUdpPort");
@@ -47,74 +43,45 @@ public class Client {
         try {
             
             // Inicializa socket UDP para ler e enviar mensagens
-            directoryServerAddr = InetAddress.getByName(args[0]);
-            directoryServerPort = Integer.parseInt(args[1]);
-            socketUDP = new DatagramSocket();            
-            
-            // Fica á escuta no Porto UDP automático
-            startUdpListener();
+            InetAddress directoryServerAddr = InetAddress.getByName(args[0]);
+            Integer directoryServerPort = Integer.parseInt(args[1]);
+            udpHandler = new ClientUdpHandler(directoryServerAddr, directoryServerPort);
             
             // Enviar heartbeats UDP ao serviço de directoria
-            beginHeartbeat();
+            (hbSender = new HeartbeatSender(
+                    new Heartbeat(udpHandler.getLocalPort(),name),directoryServerAddr, directoryServerPort)
+            ).start();
             
             // Ligar ao servidor de ficheiros TCP
             connectToTcpServer(InetAddress.getByName("127.0.0.1"), 7001);
             System.out.println(askTcpServer(" pedido1"));
             
-            // Tratar das mensagens da consola para ser enviadas ao serv. de directoria Udp
-            ByteArrayOutputStream baos;
-            ObjectOutputStream oOut;
+            /* Await Commands */    
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            
             while(true){
                 System.out.print("> ");
                 msg = in.readLine();
+
+                if(msg.equalsIgnoreCase(EXIT)){ break; }
                 
-                if(msg.equalsIgnoreCase(EXIT)){
-                    break;
-                }
-                
-                baos = new ByteArrayOutputStream();
-                oOut = new ObjectOutputStream(baos);
-                oOut.writeObject(new Msg(name, msg));
-                oOut.flush(); oOut.close();
-            
-                packet = new DatagramPacket(baos.toByteArray(), baos.size(),
-                        directoryServerAddr, directoryServerPort);
-                socketUDP.send(packet);
+                //Imprime a resposta ao pedido
+                System.out.println(
+                        udpHandler.sendRequest(new Msg(name, msg))
+                );
             }
+            udpHandler.terminateThread();
+            udpHandler.closeSocket();
+            
             closeTcpConnection();
-            //E UDP TAMBÉM
             
-            //Esperar que as threads terminem (n é preciso)
-            //x.join();
-            
+
         } catch (UnknownHostException ex) {
             System.out.println("[Cliente] Destino desconhecido:\n\t"+ex);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        } /*catch (InterruptedException ex) {
-            System.out.println("[Cliente-Heartbeat] Erro na thread UDP de cliente:\n\t"+ex);
-        }*/
-    }
-    
-    /**
-     * Thread que fica encarregada de enviar o heartbeat de 30 em 30 segs.
-     */
-    public static void beginHeartbeat(){
-        hbSender = new HeartbeatSender(
-                new Heartbeat(udpListener.getLocalPort(),name),
-                directoryServerAddr, directoryServerPort
-        );
-        hbSender.start();
-    }
-    
-    /**
-     * Inicializa a classe encarregada por receber packets UDP.
-     */
-    public static void startUdpListener(){
-        udpListener = new UdpClientListener(socketUDP);
-        udpListener.start();
+        }catch(ClassNotFoundException e){
+             System.out.println("O objecto recebido não é do tipo esperado:\n\t"+e);
+        }
     }
     
     /**

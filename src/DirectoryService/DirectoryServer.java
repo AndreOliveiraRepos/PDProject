@@ -1,27 +1,10 @@
 package DirectoryService;
 
-
-import java.util.ArrayList;
-
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 public class DirectoryServer {
     
-    private static UdpServerListener udpReceiver;
-    
-    private static ArrayList connectedServers;
-    
+    private static ServerUdpListener udpReceiver;
+        
     public static void main(String[] args) {
-        startUdpListener();
-    }
-    
-    public static void startUdpListener(){
-        udpReceiver = new UdpServerListener();
-        udpReceiver.start();
+        (udpReceiver = new ServerUdpListener()).start();
     }
 }

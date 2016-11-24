@@ -99,6 +99,8 @@ public class FileServer {
             System.out.println("Sintaxe: java FileServer serverName dirServerAddress dirServerUdpPort");
             return;
         }
+        
+        //Liga ao serviço de directoria e vê se não existe mais nenhum servidor com o mesmo nome
             
         try {    
             FileServer fserver = new FileServer(args[0],
