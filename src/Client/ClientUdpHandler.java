@@ -1,7 +1,6 @@
 package Client;
 
 import common.Msg;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,14 +10,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 public class ClientUdpHandler{
     public static final int MAX_SIZE = 1000;
@@ -46,6 +37,8 @@ public class ClientUdpHandler{
     
     public String sendRequest(Msg msg) throws IOException, ClassNotFoundException
     {
+        if (socket == null) return null;
+        
         ByteArrayOutputStream baos;
         ObjectOutputStream oOut;
         baos = new ByteArrayOutputStream();
@@ -70,14 +63,6 @@ public class ClientUdpHandler{
         in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
         obj = in.readObject();
 
-        System.out.println("packet received...");
-
-        /*if (obj instanceof Msg){
-            Msg msg = (Msg)obj;
-            System.out.println("Message: \n\t Nickname: "+msg.getName()
-                                + "\n\t Text: "+msg.getMsg());
-
-        } else*/ 
         if (!(obj instanceof String)){
             System.out.println("Erro: Objecto recebido do tipo inesperado!");
         }

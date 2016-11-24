@@ -61,7 +61,6 @@ public class ServerUdpListener extends Thread{
         socket.receive(packet);
         in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
         obj = in.readObject();
-        System.out.println("packet received...");
 
         if (obj instanceof Heartbeat){
             Heartbeat heartbeat = (Heartbeat)obj;
