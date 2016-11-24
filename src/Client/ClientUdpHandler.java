@@ -24,7 +24,6 @@ public class ClientUdpHandler{
     public static final int MAX_SIZE = 1000;
     protected DatagramSocket socket;
     protected DatagramPacket packet;
-    protected boolean running;
     
     InetAddress directoryServerAddr;
     Integer directoryServerPort;
@@ -37,37 +36,9 @@ public class ClientUdpHandler{
         }finally{
             System.out.println("Udp client port:\n\t"+socket.getLocalPort());
         }
-        running = true;
         directoryServerAddr = dirServerAddr;
         directoryServerPort = dirServerPort;
     }
-    
-    /*@Override
-    public void run(){
-        
-        
-        
-        try{
-            
-            while(running){         
-                System.out.println(s);
-            } // Ciclo while           
-        }catch(UnknownHostException e){
-             System.out.println("Destino desconhecido:\n\t"+e);
-        }catch(SocketTimeoutException e){
-            System.out.println("Não foi recebida qualquer resposta:\n\t"+e);
-        }catch(SocketException e){
-            System.out.println("Ocorreu um erro ao nível do socket UDP:\n\t"+e);
-        }catch(IOException e){
-            System.out.println("Ocorreu um erro no acesso ao socket:\n\t"+e);
-        }catch(ClassNotFoundException e){
-             System.out.println("O objecto recebido não é do tipo esperado:\n\t"+e);
-        }finally{
-            if(socket != null){
-                socket.close();
-            }
-        }
-    }*/
     
     public int getLocalPort(){
         return socket.getLocalPort();
@@ -106,16 +77,11 @@ public class ClientUdpHandler{
             System.out.println("Message: \n\t Nickname: "+msg.getName()
                                 + "\n\t Text: "+msg.getMsg());
 
-        } else*/ if (obj instanceof String){
-            System.out.println((String)obj);
-        } else
-            System.out.println("Erro: Objecto recebido do tipo inesperado! "+(String)obj);
-        
+        } else*/ 
+        if (!(obj instanceof String)){
+            System.out.println("Erro: Objecto recebido do tipo inesperado!");
+        }
         return (String)obj;
-    }
-    
-    public void terminateThread(){
-        running = false;
     }
     
     public void closeSocket(){

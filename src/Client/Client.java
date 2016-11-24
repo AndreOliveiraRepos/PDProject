@@ -26,7 +26,6 @@ public class Client {
     private static String name;
     
     private static Socket socketToServer;       //Socket TCP
-    private static DatagramSocket socketUDP;    //Socket UDP
     private static ClientUdpHandler udpHandler;
     private static HeartbeatSender hbSender;
         
@@ -54,6 +53,8 @@ public class Client {
             
             // Ligar ao servidor de ficheiros TCP
             connectToTcpServer(InetAddress.getByName("127.0.0.1"), 7001);
+            
+            
             System.out.println(askTcpServer(" pedido1"));
             
             /* Await Commands */    
@@ -64,14 +65,14 @@ public class Client {
 
                 if(msg.equalsIgnoreCase(EXIT)){ break; }
                 
-                //Imprime a resposta ao pedido
+                // DISTINGUIR ENTRE COMANDO PARA O SERVIÇO DE DIRECTORIA E PARA O TCP
+                //Imprime a resposta ao pedido do serviço de directoria
+                //EXEMPLO
                 System.out.println(
                         udpHandler.sendRequest(new Msg(name, msg))
                 );
             }
-            udpHandler.terminateThread();
             udpHandler.closeSocket();
-            
             closeTcpConnection();
             
 

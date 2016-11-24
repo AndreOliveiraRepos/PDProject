@@ -85,7 +85,6 @@ public class ServerUdpListener extends Thread{
     
     protected void sendConnectedServers(DatagramPacket packet) throws IOException
     {
-        System.out.println("vou enviar listagem de servidores");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         String r = "Objecto com listagem de servers activos\n";
@@ -95,7 +94,6 @@ public class ServerUdpListener extends Thread{
         packet.setData(baos.toByteArray());
         packet.setLength(baos.size());
         socket.send(packet);
-        System.out.println("enviei");
     }
     
     protected void sendResponse(DatagramPacket packet) throws IOException
