@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,8 +51,16 @@ public class Client {
             System.out.println(
                     tcpHandler.sendRequest("I pedido1 I")
             );
+            /* Exemplo para listagem de comandos 
+            NAME luis -> altera o nome para luis
+            EXIT -> sai (já faz isto no while loop)
+            LIST -> lista os servidores ligados
+            MSG -> envia uma mensagem a todos os clientes activos
+            MSGTO luis -> envia uma mensagem ao luis
+            ... o resto dos comandos são enviados ao tcp
             
-            
+            */
+
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true){
                 System.out.print("> ");
@@ -79,5 +86,5 @@ public class Client {
         }catch(ClassNotFoundException e){
              System.out.println("O objecto recebido não é do tipo esperado:\n\t"+e);
         }
-    }    
+    }
 }
