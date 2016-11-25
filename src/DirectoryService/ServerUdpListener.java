@@ -61,7 +61,7 @@ public class ServerUdpListener extends Thread{
         socket.receive(packet);
         in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
         obj = in.readObject();
-
+        
         if (obj instanceof Heartbeat){
             Heartbeat heartbeat = (Heartbeat)obj;
             System.out.println("Heatbeat data: \n\t TCPServerName: "+heartbeat.getName()
