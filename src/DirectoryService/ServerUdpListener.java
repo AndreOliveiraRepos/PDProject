@@ -18,6 +18,7 @@ public class ServerUdpListener extends Thread{
     public static final int MAX_SIZE = 1000;
     public static final String LIST = "LIST";
     public static final String MSG = "MSG";
+    public static final int TIMEOUT = 5000; //2 segs
     protected DatagramSocket socket;
     protected ServerManager serverManager;
     protected boolean listening;
@@ -33,7 +34,8 @@ public class ServerUdpListener extends Thread{
         serverManager.start();
         try{
             int tempPort = 56321;
-            socket = new DatagramSocket(tempPort);
+            socket = new DatagramSocket(tempPort); //()
+            //socket.setSoTimeout(TIMEOUT);
             DatagramPacket packet = null;
             System.out.println("UDP Port:\n\t"+socket.getLocalPort()+" v3");
             

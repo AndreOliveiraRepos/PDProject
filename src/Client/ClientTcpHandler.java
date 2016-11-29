@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ClientTcpHandler {
     public static final int TIMEOUT = 5000; //5 segs
@@ -36,6 +34,7 @@ public class ClientTcpHandler {
                 socketToServer.close();
             }
             socketToServer = new Socket(servAddr, servPort);
+            socketToServer.setSoTimeout(TIMEOUT);
             return true;
         } catch (IOException e) {
             System.out.println("Ocorreu um erro no acesso ao socket TCP" + ":\n\t"+e);
