@@ -12,15 +12,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Client {
-    public static final int MAX_SIZE = 4000;
     public static final String EXIT = "EXIT";
    
     private static String name;
     
-    //private static Socket socketToServer;       //Socket TCP
     private static ClientTcpHandler tcpHandler;
     private static ClientUdpHandler udpHandler;
-    private static HeartbeatSender hbSender;
+    private static HeartbeatSender<Heartbeat> hbSender;
         
     public static void main(String[] args) {
         String msg;
@@ -42,23 +40,22 @@ public class Client {
             tcpHandler = new ClientTcpHandler();
             
             // Enviar heartbeats UDP ao serviço de directoria
-            (hbSender = new HeartbeatSender(
-                    new Heartbeat(udpHandler.getLocalPort(),name),directoryServerAddr, directoryServerPort)
-            ).start();
+            hbSender = new HeartbeatSender<Heartbeat>(new Heartbeat(udpHandler.getLocalPort(),name),directoryServerAddr, directoryServerPort);
+            hbSender.setDaemon(true);
+            hbSender.start();
             
             // exemplo de uso request ao server TCP
-            tcpHandler.connectToServer(InetAddress.getByName("127.0.0.1"), 7001);
-            System.out.println(
+            //tcpHandler.connectToServer(InetAddress.getByName("127.0.0.1"), 7001);
+            /*System.out.println(
                     tcpHandler.sendRequest("I pedido1 I")
-            );
-            /* Exemplo para listagem de comandos 
+            );*/
+            /* Exemplo para listagem de comandos
             NAME luis -> altera o nome para luis
             EXIT -> sai (já faz isto no while loop)
             LIST -> lista os servidores ligados
             MSG -> envia uma mensagem a todos os clientes activos
             MSGTO luis -> envia uma mensagem ao luis
             ... o resto dos comandos são enviados ao tcp
-            
             */
 
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));

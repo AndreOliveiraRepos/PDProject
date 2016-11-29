@@ -8,8 +8,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-public class HeartbeatSender extends Thread{
-    private final Heartbeat heartbeat;
+public class HeartbeatSender<T> extends Thread{
+    private final T heartbeat;
     private final InetAddress serverAddr;
     private final int serverPort;
     private boolean running;
@@ -22,7 +22,7 @@ public class HeartbeatSender extends Thread{
     private ByteArrayOutputStream bOut;
     private ObjectOutputStream out;
     
-    public HeartbeatSender(Heartbeat hb, InetAddress serverAddr, int serverPort){
+    public HeartbeatSender(T hb, InetAddress serverAddr, int serverPort){
         this.serverAddr = serverAddr;
         this.serverPort = serverPort;
         this.heartbeat = hb;

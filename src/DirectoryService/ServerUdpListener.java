@@ -1,5 +1,6 @@
 package DirectoryService;
 
+import FileServer.ServerHeartbeat;
 import common.Heartbeat;
 import common.Msg;
 import java.io.ByteArrayInputStream;
@@ -18,14 +19,18 @@ public class ServerUdpListener extends Thread{
     public static final String LIST = "LIST";
     public static final String MSG = "MSG";
     protected DatagramSocket socket;
+    protected ServerManager serverManager;
     protected boolean listening;
     
     public ServerUdpListener(){
         listening = true;
+        serverManager = new ServerManager();
     }
     
     @Override
-    public void run(){ 
+    public void run(){
+        serverManager.setDaemon(true);
+        serverManager.start();
         try{
             int tempPort = 56321;
             socket = new DatagramSocket(tempPort);
@@ -62,11 +67,18 @@ public class ServerUdpListener extends Thread{
         in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
         obj = in.readObject();
         
+        if (obj instanceof ServerHeartbeat){
+            ServerHeartbeat heartbeat = (ServerHeartbeat)obj;
+            System.out.println("Server Heatbeat data: \n\t TCPServerName: "+heartbeat.getName()
+                                + "\n\t TCPServerPort: "+heartbeat.getPort());
+            serverManager.processHeartbeat(heartbeat);
+        } else
         if (obj instanceof Heartbeat){
             Heartbeat heartbeat = (Heartbeat)obj;
-            System.out.println("Heatbeat data: \n\t TCPServerName: "+heartbeat.getName()
+            System.out.println("Client Heatbeat data: \n\t TCPServerName: "+heartbeat.getName()
                                 + "\n\t TCPServerPort: "+heartbeat.getPort());
-        } else if (obj instanceof Msg){
+        }
+        else if (obj instanceof Msg){
             Msg msg = (Msg)obj;
             
             if(msg.getMsg().equalsIgnoreCase(LIST)){

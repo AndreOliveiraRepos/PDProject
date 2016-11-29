@@ -50,7 +50,7 @@ public class ClientTcpHandler {
             if(socketToServer == null) return null;
             pout = new PrintWriter(socketToServer.getOutputStream(), true);
             pout.println(request);
-            pout.flush();        
+            pout.flush();
         } catch (IOException ex) {
             System.out.println("Erro: Não foi possível enviar os dados ao servidor via TCP!");
         }

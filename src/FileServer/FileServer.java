@@ -68,13 +68,13 @@ public class FileServer {
     private static InetAddress directoryServerAddr;
     private static int directoryServerPort;
     
-    private static HeartbeatSender hbSender;
+    private static HeartbeatSender<ServerHeartbeat> hbSender;
     private static boolean online;
     
     private int threadId;
     private static ServerSocket serverSocket;  //TCP Server
     
-    private static ArrayList connectedClients;
+    private static ArrayList<String> connectedClients;
     //directory
     
     public FileServer(String n, InetAddress dirAddr, int dirPort) {
@@ -83,11 +83,12 @@ public class FileServer {
         directoryServerPort = dirPort;
         threadId = 0;
         name = n;
+        connectedClients = new ArrayList<String>();
         online = true;
         
         try {
             //Gera porto automático TCP
-            serverSocket = new ServerSocket(7001);
+            serverSocket = new ServerSocket(0); //0 //7001
         } catch (IOException ex) {
             System.out.println("Ocorreu um erro no acesso ao socket:\n\t"+ex);
         }
@@ -109,7 +110,12 @@ public class FileServer {
             );
             
             //Inicializar heartbeat/Packets UDP
-            beginHeartbeat();
+            hbSender = new HeartbeatSender<ServerHeartbeat>(
+                new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients),
+                directoryServerAddr, directoryServerPort);
+            hbSender.setDaemon(true);
+            hbSender.start();
+            
             fserver.processRequests();
             //Esperar que a thread termine
             hbSender.join();
@@ -119,15 +125,6 @@ public class FileServer {
         } catch (InterruptedException ex) {
             System.out.println("Erro na thread UDP:\n\t"+ex);
         }   
-    }
-    
-    public static void beginHeartbeat(){
-        //Thread que fica encarregada de enviar o heartbeat de 30 em 30 segs
-        hbSender = new HeartbeatSender(
-                new Heartbeat(serverSocket.getLocalPort(),name),
-                directoryServerAddr, directoryServerPort
-        );
-        hbSender.start();
     }
     
     public void goOffline(){
