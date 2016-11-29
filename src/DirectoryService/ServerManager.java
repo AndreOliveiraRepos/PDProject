@@ -34,14 +34,15 @@ public class ServerManager extends Thread{
                 while (it.hasNext()) {
                     Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();  
                     
-                    System.out.println(entry.getKey() /*+ " = " + entry.getValue()*/);
+                    System.out.print(""+entry.getKey() /*+ " = " + entry.getValue()*/);
                     double timestampSeconds = (double)entry.getValue().getTimestamp() / 1000000000.0;
                     double systemSeconds = (double)System.nanoTime() / 1000000000.0;
-                    System.out.println("Last connection in: "+(systemSeconds - timestampSeconds));
+                    System.out.print("\t Ultimo hb: "+(systemSeconds - timestampSeconds)+ " segundos.\n");
                     if((systemSeconds - timestampSeconds) > ACCEPTED_INTERVAL){
-                        onlineServers.remove(entry.getKey());
+                        it.remove();
+                        //onlineServers.remove(entry.getKey());
                     }
-                    it.remove(); //iterador
+                    //it.remove(); //iterador
                 }
             }
             try {
