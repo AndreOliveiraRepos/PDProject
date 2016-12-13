@@ -84,6 +84,7 @@ public class Client {
             udpHandler.closeSocket();
             tcpHandler.closeSocket();
             
+            
         } catch (UnknownHostException ex) {
             System.out.println("[Cliente] Destino desconhecido:\n\t"+ex);
         } catch (IOException ex) {
