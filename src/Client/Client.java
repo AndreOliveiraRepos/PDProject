@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 public class Client {
     public static final String EXIT = "EXIT";
+    public static final String NAME = "NAME";
    
     private static String name;
     
@@ -50,28 +51,35 @@ public class Client {
                     tcpHandler.sendRequest("I pedido1 I")
             );*/
             /* Exemplo para listagem de comandos
-            NAME luis -> altera o nome para luis
-            EXIT -> sai (já faz isto no while loop)
+            OK-NAME luis -> altera o nome para luis
+            OK-EXIT -> sai (já faz isto no while loop)
             LIST -> lista os servidores ligados
             MSG -> envia uma mensagem a todos os clientes activos
             MSGTO luis -> envia uma mensagem ao luis
             ... o resto dos comandos são enviados ao tcp
             */
 
+            ClientCommands commands = new ClientCommands(udpHandler,tcpHandler);
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true){
                 System.out.print("> ");
                 msg = in.readLine();
 
-                if(msg.equalsIgnoreCase(EXIT)){ break; }
+                if(msg.equalsIgnoreCase(EXIT)){ 
+                    break; 
+                } else {
+                    String[] cmd = msg.split("\\s");
+                    if (cmd[0].equalsIgnoreCase(NAME)){
+                        name = cmd[1];
+                        continue;
+                    }
+                }
                 
                 // DISTINGUIR ENTRE COMANDO PARA O SERVIÇO DE DIRECTORIA E PARA O TCP
                 //Imprime a resposta ao pedido do serviço de directoria
                 //EXEMPLO
                 // exemplo de uso request ao server UDP  
-                System.out.println(
-                        udpHandler.sendRequest(new Msg(name, msg))
-                );
+                System.out.println(commands.processRequest(new Msg(name, msg)));
             }
             udpHandler.closeSocket();
             tcpHandler.closeSocket();
@@ -80,8 +88,8 @@ public class Client {
             System.out.println("[Cliente] Destino desconhecido:\n\t"+ex);
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        }catch(ClassNotFoundException e){
+        }/*catch(ClassNotFoundException e){
              System.out.println("O objecto recebido não é do tipo esperado:\n\t"+e);
-        }
+        }*/
     }
 }

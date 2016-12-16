@@ -10,6 +10,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClientUdpHandler{
     public static final int MAX_SIZE = 1000;
@@ -18,6 +20,7 @@ public class ClientUdpHandler{
     
     InetAddress directoryServerAddr;
     Integer directoryServerPort;
+    Map<String,Integer> availableTcpServers;
     
     public ClientUdpHandler(InetAddress dirServerAddr, Integer dirServerPort){
         try {
@@ -29,6 +32,8 @@ public class ClientUdpHandler{
         }
         directoryServerAddr = dirServerAddr;
         directoryServerPort = dirServerPort;
+        
+        availableTcpServers = new HashMap<String, Integer>();
     }
     
     public int getLocalPort(){
@@ -63,10 +68,15 @@ public class ClientUdpHandler{
         in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
         obj = in.readObject();
 
-        if (!(obj instanceof String)){
+        if (obj instanceof String){
+            return (String)obj;
+        } else if (obj instanceof Map) {
+            availableTcpServers = (Map)obj;
+            return availableTcpServers.toString();
+        }else {
             System.out.println("Erro: Objecto recebido do tipo inesperado!");
         }
-        return (String)obj;
+        return "";
     }
     
     public void closeSocket(){

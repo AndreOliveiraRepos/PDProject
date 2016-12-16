@@ -35,12 +35,12 @@ class AtendeCliente extends Thread {
         String clientRequest = null;
         String resposta = null;
         
-        try{            
+        try{
             // Streams de entrada e saída via TCP
             in = new BufferedReader(
-                    new InputStreamReader(
-                            socketToClient.getInputStream()
-                    )
+                new InputStreamReader(
+                    socketToClient.getInputStream()
+                )
             );
             out = socketToClient.getOutputStream();
             

@@ -34,7 +34,7 @@ public class ServerManager extends Thread{
                 while (it.hasNext()) {
                     Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();  
                     
-                    System.out.print(""+entry.getKey() /*+ " = " + entry.getValue()*/);
+                    System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
                     double timestampSeconds = (double)entry.getValue().getTimestamp() / 1000000000.0;
                     double systemSeconds = (double)System.nanoTime() / 1000000000.0;
                     System.out.print("\t Ultimo hb: "+(systemSeconds - timestampSeconds)+ " segundos.\n");
@@ -59,6 +59,29 @@ public class ServerManager extends Thread{
     
     public List<ServerEntry> getOnlineServers(){
         return (List<ServerEntry>) onlineServers.values();
+    }
+    
+    public Map<String,Integer> getServerMap(){
+//        StringBuilder buffer = new StringBuilder();
+//        Iterator it = onlineServers.entrySet().iterator();
+//        while (it.hasNext()) {
+//            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();  
+//
+//            System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
+//            buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+//        }
+//        return buffer.toString();*/
+        Map<String,Integer> serversInfo = new HashMap<String,Integer>();
+
+        Iterator it = onlineServers.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();
+
+            //System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
+            //buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+            serversInfo.put(entry.getKey(), entry.getValue().getPort());
+        }
+        return serversInfo;
     }
     
     @Override

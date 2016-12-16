@@ -38,7 +38,6 @@ public class HeartbeatSender<T> extends Thread{
     public void run(){
         
         try{
-            
             socket = new DatagramSocket();
             socket.setSoTimeout(TIMEOUT_MS);
             

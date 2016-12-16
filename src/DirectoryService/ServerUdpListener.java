@@ -69,26 +69,29 @@ public class ServerUdpListener extends Thread{
         in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
         obj = in.readObject();
         
-        if (obj instanceof ServerHeartbeat){
+        if (obj instanceof ServerHeartbeat)
+        {
             ServerHeartbeat heartbeat = (ServerHeartbeat)obj;
             System.out.println("Server Heatbeat data: \n\t TCPServerName: "+heartbeat.getName()
                                 + "\n\t TCPServerPort: "+heartbeat.getPort());
-            serverManager.processHeartbeat(heartbeat);
-        } else
-        if (obj instanceof Heartbeat){
+            serverManager.processHeartbeat(heartbeat);  
+        } 
+        else if (obj instanceof Heartbeat)
+        {
             Heartbeat heartbeat = (Heartbeat)obj;
             System.out.println("Client Heatbeat data: \n\t TCPServerName: "+heartbeat.getName()
                                 + "\n\t TCPServerPort: "+heartbeat.getPort());
-        }
-        else if (obj instanceof Msg){
+        } 
+        else if (obj instanceof Msg)
+        {
             Msg msg = (Msg)obj;
             
             if(msg.getMsg().equalsIgnoreCase(LIST)){
-                sendConnectedServers(packet);
+                sendResponse(packet, serverManager.getServerMap());
             } else /*if (msg.getMsg().equalsIgnoreCase(MSG))*/{
                 System.out.println("Message: \n\t Nickname: "+msg.getName()
                                 + "\n\t Text: "+msg.getMsg());
-                sendResponse(packet);
+                sendResponse(packet, "resposta servidor");
             } 
         } else if (obj instanceof String){
             System.out.println((String)obj);
@@ -96,24 +99,11 @@ public class ServerUdpListener extends Thread{
             System.out.println("Erro: Objecto recebido do tipo inesperado!");
     }
     
-    protected void sendConnectedServers(DatagramPacket packet) throws IOException
+    protected <T> void sendResponse(DatagramPacket packet, T response) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
-        String r = "Objecto com listagem de servers activos\n";
-        oos.writeObject(r);
-        oos.flush();
-
-        packet.setData(baos.toByteArray());
-        packet.setLength(baos.size());
-        socket.send(packet);
-    }
-    
-    protected void sendResponse(DatagramPacket packet) throws IOException
-    {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        String r = "Servidor recebeu o packet UDP";
+        T r = response;
         oos.writeObject(r);
         oos.flush();
 
