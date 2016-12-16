@@ -20,7 +20,7 @@ public class ClientUdpHandler{
     
     InetAddress directoryServerAddr;
     Integer directoryServerPort;
-    Map<String,Integer> availableTcpServers;
+    
     
     public ClientUdpHandler(InetAddress dirServerAddr, Integer dirServerPort){
         try {
@@ -33,7 +33,7 @@ public class ClientUdpHandler{
         directoryServerAddr = dirServerAddr;
         directoryServerPort = dirServerPort;
         
-        availableTcpServers = new HashMap<String, Integer>();
+        //availableTcpServers = new HashMap<String, Integer>();
     }
     
     public int getLocalPort(){
@@ -71,7 +71,11 @@ public class ClientUdpHandler{
         if (obj instanceof String){
             return (String)obj;
         } else if (obj instanceof Map) {
+            Map<String,Integer> availableTcpServers = new HashMap<String, Integer>();
             availableTcpServers = (Map)obj;
+            
+            
+            
             return availableTcpServers.toString();
         }else {
             System.out.println("Erro: Objecto recebido do tipo inesperado!");

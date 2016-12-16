@@ -1,5 +1,6 @@
 package Client;
 
+import common.FileSystem;
 import common.Msg;
 import common.Heartbeat;
 import common.HeartbeatSender;
@@ -14,12 +15,24 @@ import java.util.logging.Logger;
 public class Client {
     public static final String EXIT = "EXIT";
     public static final String NAME = "NAME";
+    public static final String COPY = "COPY";
+    public static final String REGISTER = "REGISTER";
+    public static final String LOGIN = "LOGIN";
+    public static final String LOGOUT = "LOGOUT";
+    public static final String MOVE = "MV";
+    public static final String CHANGEDIR = "CD";
+    public static final String GETCONTENTDIR = "LS";
+    public static final String GETFILECONTENT = "PICO";
+    public static final String MKDIR = "MKDIR";
+    public static final String RMFILE = "RM";
+    
    
     private static String name;
     
     private static ClientTcpHandler tcpHandler;
     private static ClientUdpHandler udpHandler;
     private static HeartbeatSender<Heartbeat> hbSender;
+    private FileSystem clientFileSystem;
         
     public static void main(String[] args) {
         String msg;
@@ -64,7 +77,40 @@ public class Client {
             while(true){
                 System.out.print("> ");
                 msg = in.readLine();
-
+                /*switch(msg.toUpperCase()){
+                    case EXIT:
+                        break;
+                    case NAME:
+                        break;
+                    case COPY:
+                         break;
+                    case REGISTER:
+                        break;
+                    case LOGIN:
+                        break;
+                    case LOGOUT:
+                        break;
+                    case MOVE:
+                        break;
+                    case CHANGEDIR:
+                        break;
+                    case GETCONTENTDIR:
+                        break;
+                    case GETFILECONTENT:
+                        break;
+                    case MKDIR:
+                        break;
+                    case RMFILE:
+                        break;
+                    default:
+                        String[] cmd = msg.split("\\s");
+                         if (cmd[0].equalsIgnoreCase(NAME)){
+                             name = cmd[1];
+                             continue;
+                         }
+                        break;
+                       
+                   }*/
                 if(msg.equalsIgnoreCase(EXIT)){ 
                     break; 
                 } else {

@@ -21,10 +21,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author red_f
- */
 public class FileSystem implements Serializable{
     private String remoteHomeDir;
     private String localHomeDir;
@@ -43,7 +39,7 @@ public class FileSystem implements Serializable{
     }
     //monta vistas
     public void buildTrees(){
-        
+        //test
         
     }
     
@@ -112,19 +108,21 @@ public class FileSystem implements Serializable{
     public void removeFile(String fileName){
         if(this.workingDirectory.contains("remote")){
             //request to server, get response;
+        }else{
+            File f = new File(fileName);
+            f.delete();
+            System.out.println("Done!");
         }
-        File f = new File(fileName);
-        f.delete();
-        System.out.println("Done!");
     }
     public void makeDir(String path){
         if(this.workingDirectory.contains("remote")){
             //request to server, get response;
-        }
-        File newDir = new File(path);
-        if(!newDir.exists()){
-            newDir.mkdir();
-            System.out.println("Done!");
+        }else{
+            File newDir = new File(path);
+            if(!newDir.exists()){
+                newDir.mkdir();
+                System.out.println("Done!");
+            }
         }
     }
     
