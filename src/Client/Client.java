@@ -37,7 +37,6 @@ public class Client {
             InetAddress directoryServerAddr = InetAddress.getByName(args[0]);
             Integer directoryServerPort = Integer.parseInt(args[1]);
             udpHandler = new ClientUdpHandler(directoryServerAddr, directoryServerPort);
-            
             tcpHandler = new ClientTcpHandler();
             
             // Enviar heartbeats UDP ao serviço de directoria
@@ -70,15 +69,13 @@ public class Client {
                 } else {
                     String[] cmd = msg.split("\\s");
                     if (cmd[0].equalsIgnoreCase(NAME)){
-                        name = cmd[1];
-                        continue;
+                        if (cmd.length == 2){
+                            name = cmd[1];
+                            System.out.println("Nome: " + name);
+                            continue;
+                        } else System.out.println("Erro de sintaxe: nome <nome>");
                     }
                 }
-                
-                // DISTINGUIR ENTRE COMANDO PARA O SERVIÇO DE DIRECTORIA E PARA O TCP
-                //Imprime a resposta ao pedido do serviço de directoria
-                //EXEMPLO
-                // exemplo de uso request ao server UDP  
                 System.out.println(commands.processRequest(new Msg(name, msg)));
             }
             udpHandler.closeSocket();
