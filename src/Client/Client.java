@@ -15,24 +15,14 @@ import java.util.logging.Logger;
 public class Client {
     public static final String EXIT = "EXIT";
     public static final String NAME = "NAME";
-    public static final String COPY = "COPY";
-    public static final String REGISTER = "REGISTER";
-    public static final String LOGIN = "LOGIN";
-    public static final String LOGOUT = "LOGOUT";
-    public static final String MOVE = "MV";
-    public static final String CHANGEDIR = "CD";
-    public static final String GETCONTENTDIR = "LS";
-    public static final String GETFILECONTENT = "PICO";
-    public static final String MKDIR = "MKDIR";
-    public static final String RMFILE = "RM";
+    
     
    
     private static String name;
-    
     private static ClientTcpHandler tcpHandler;
     private static ClientUdpHandler udpHandler;
     private static HeartbeatSender<Heartbeat> hbSender;
-    private FileSystem clientFileSystem;
+    private static FileSystem clientFileSystem;
         
     public static void main(String[] args) {
         String msg;
@@ -71,46 +61,13 @@ public class Client {
             MSGTO luis -> envia uma mensagem ao luis
             ... o resto dos comandos são enviados ao tcp
             */
-
+            clientFileSystem = new FileSystem(name);
             ClientCommands commands = new ClientCommands(udpHandler,tcpHandler);
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true){
                 System.out.print("> ");
                 msg = in.readLine();
-                /*switch(msg.toUpperCase()){
-                    case EXIT:
-                        break;
-                    case NAME:
-                        break;
-                    case COPY:
-                         break;
-                    case REGISTER:
-                        break;
-                    case LOGIN:
-                        break;
-                    case LOGOUT:
-                        break;
-                    case MOVE:
-                        break;
-                    case CHANGEDIR:
-                        break;
-                    case GETCONTENTDIR:
-                        break;
-                    case GETFILECONTENT:
-                        break;
-                    case MKDIR:
-                        break;
-                    case RMFILE:
-                        break;
-                    default:
-                        String[] cmd = msg.split("\\s");
-                         if (cmd[0].equalsIgnoreCase(NAME)){
-                             name = cmd[1];
-                             continue;
-                         }
-                        break;
-                       
-                   }*/
+                
                 if(msg.equalsIgnoreCase(EXIT)){ 
                     break; 
                 } else {
@@ -125,7 +82,8 @@ public class Client {
                 //Imprime a resposta ao pedido do serviço de directoria
                 //EXEMPLO
                 // exemplo de uso request ao server UDP  
-                System.out.println(commands.processRequest(new Msg(name, msg)));
+                System.out.println(commands.processCommands(new Msg(name, msg),clientFileSystem));
+                //System.out.println(commands.processRequest(new Msg(name, msg)));
             }
             udpHandler.closeSocket();
             tcpHandler.closeSocket();

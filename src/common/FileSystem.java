@@ -27,6 +27,7 @@ public class FileSystem implements Serializable{
     private String workingDirectory;
     private String clientName;
     private String currentServer;
+    private String output;
     
     
     public FileSystem(String name){
@@ -59,14 +60,15 @@ public class FileSystem implements Serializable{
             //request to server, get response;
         }
         else{
-            File s = new File(this.workingDirectory + fileName);
-            File d = new File(destinyPath + fileName);
+            File s = new File(this.workingDirectory +"/" + fileName);
+            File d = new File(destinyPath +"/" +fileName);
             try {
                source = new FileInputStream(s).getChannel();
                destination = new FileOutputStream(d).getChannel();
                destination.transferFrom(source, 0, source.size());
                source.close();
                destination.close();
+                System.out.println("Done!");
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
@@ -75,27 +77,61 @@ public class FileSystem implements Serializable{
         }
         
     }
-    public void moveFile(String fileName,String destinyPath){}
-    public void changeWorkingDirectory(String path){
-        this.workingDirectory = path;
-    }
-    public void getWorkingDirContent(){
-        if(this.workingDirectory.contains("remote")){
-            //request to server, get response;
-        }
-        else{
-            File folder = new File(this.workingDirectory);
-            File[] listOfFiles = folder.listFiles();
+    
+    public String moveFile(String fileName,String destinyPath){
+        output = "";
+        FileChannel source;
+        FileChannel destination;
+        
+        File s = new File(this.workingDirectory +"/" + fileName);
+        File d = new File(destinyPath +"/" +fileName);
+        
+        if(s.exists()){
+            try {
+                source = new FileInputStream(s).getChannel();
+                destination = new FileOutputStream(d).getChannel();
+                destination.transferFrom(source, 0, source.size());
+                source.close();
+                destination.close();
 
-            for (int i = 0; i < listOfFiles.length; i++) {
-              if (listOfFiles[i].isFile()) {
-                System.out.println("[F]:" + listOfFiles[i].getName());
-              } else if (listOfFiles[i].isDirectory()) {
-                System.out.println("[D]:" + listOfFiles[i].getName());
-              }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
             }
+            s.delete();
+            output = fileName +" moved to " + destinyPath;
+        }else{
+            output+= this.workingDirectory +"/" + fileName + " not found!";
+        }
+        return output;
+    }
+    
+    public String changeWorkingDirectory(String path){
+        output +="";
+        this.workingDirectory += path;
+        output += "Working Directory is now " + path;
+        return output;
+    }
+    public String getWorkingDirContent() {
+        output="";
+       
+        File folder = new File(this.workingDirectory);
+        File[] listOfFiles = folder.listFiles();
+        if(listOfFiles != null){
+            output+="Listing from:" + this.workingDirectory + "\n";
+            for (int i = 0; i < listOfFiles.length; i++) {
+                if (listOfFiles[i].isFile()) {
+                  output+="[F]:" + listOfFiles[i].getName() + "\n";
+                } else if (listOfFiles[i].isDirectory()) {
+                  output+="[D]:" + listOfFiles[i].getName() + "\n";
+                }
+            }
+        }else{
+            output+="empty:";
         }
         
+        return output;
         
         
     }
@@ -105,47 +141,35 @@ public class FileSystem implements Serializable{
     //lel
     public void getFileContent(){}
     
-    public void removeFile(String fileName){
-        if(this.workingDirectory.contains("remote")){
-            //request to server, get response;
-        }else{
-            File f = new File(fileName);
+    public String removeFile(String fileName){
+        output = "";
+        
+        File f = new File(this.workingDirectory + "/" +fileName);
+        if(f.exists()){
             f.delete();
-            System.out.println("Done!");
-        }
-    }
-    public void makeDir(String path){
-        if(this.workingDirectory.contains("remote")){
-            //request to server, get response;
+            output += "Deleted " + this.workingDirectory + "/" +fileName + " sucessfuly!";
         }else{
-            File newDir = new File(path);
-            if(!newDir.exists()){
-                newDir.mkdir();
-                System.out.println("Done!");
-            }
+            output += "File not found!";
         }
-    }
-    
-    
-    //console debug only
-    public static void main(String[] args) throws IOException {
-        FileSystem fs = new FileSystem("red");
-        String msg;
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        while(true){
-            System.out.print("@" + fs.workingDirectory +"> ");
-            msg = in.readLine();
-            switch(msg){
-                case "ls":
-                    fs.getWorkingDirContent();
-                    break;
-            }
-        }
+        return output;
         
     }
-    
-    
-    
+    public String makeDir(String path){
+        
+        output ="";
+        File newDir = new File(this.workingDirectory + "/" + path);
+
+        if(!newDir.exists()){
+            newDir.mkdir();
+            output += this.workingDirectory + "/" + path + "created!";
+            
+        }
+        else{
+            output +="Directory already exists!";
+           
+        }
+        return output;
+    }
     
     
 }
