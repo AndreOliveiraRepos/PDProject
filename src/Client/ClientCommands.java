@@ -7,8 +7,9 @@ import java.util.logging.Logger;
 
 public class ClientCommands {
     
-    public static final String LIST = "LIST";
-    public static final String MSG = "MSG";
+    private static final String LIST = "LIST";
+    private static final String MSG = "MSG";
+    private static final String USERS = "USERS";
     
     private ClientTcpHandler tcpHandler;
     private ClientUdpHandler udpHandler;
@@ -22,14 +23,15 @@ public class ClientCommands {
         String[] args = msg.getMsg().split("\\s");
         
         if (args[0].equalsIgnoreCase(LIST)
-                || args[0].equalsIgnoreCase(MSG))
+            || args[0].equalsIgnoreCase(MSG)
+            || args[0].equalsIgnoreCase(USERS))
         {
             try {
                 return udpHandler.sendRequest(msg);
             } catch (IOException ex) {
-                Logger.getLogger(ClientCommands.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Erro ao enviar pedido UDP! " + ex);
             } catch (ClassNotFoundException ex) {
-                Logger.getLogger(ClientCommands.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println(ex);
             }
         }
         return "";

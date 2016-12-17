@@ -1,66 +1,12 @@
 package FileServer;
 
-import common.Heartbeat;
 import common.HeartbeatSender;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-
-class AtendeCliente extends Thread {
-    
-    public static final int MAX_SIZE = 4000;
-    
-    Socket socketToClient;
-    int myId;
-
-    public AtendeCliente(Socket s, int id){
-        socketToClient = s;
-        myId = id;
-    }
-    
-    @Override
-    public void run(){
-        BufferedReader in;
-        OutputStream out;
-        
-        /*byte[]fileChunk = new byte[MAX_SIZE];
-        int nbytes;*/
-        
-        String clientRequest = null;
-        String resposta = null;
-        
-        try{
-            // Streams de entrada e saída via TCP
-            in = new BufferedReader(
-                new InputStreamReader(
-                    socketToClient.getInputStream()
-                )
-            );
-            out = socketToClient.getOutputStream();
-            
-            clientRequest = in.readLine();
-            System.out.println("Pedido recebido: "+clientRequest);
-            
-            // Enviar resposta ao cliente
-            resposta = "O servidor recebeu o pedido" + clientRequest;
-            out.write(resposta.getBytes(),0,resposta.length());
-            out.flush();
-            
-        }catch(IOException e){
-            System.out.println("Ocorreu a excepcao de E/S: \n\t" + e);                       
-        }
-        
-        try{
-             socketToClient.close();
-        } catch (IOException ex) {}
-    }
-}
 
 public class FileServer {
     
@@ -75,7 +21,6 @@ public class FileServer {
     private static ServerSocket serverSocket;  //TCP Server
     
     private static ArrayList<String> connectedClients;
-    //directory
     
     public FileServer(String n, InetAddress dirAddr, int dirPort) {
         
@@ -85,6 +30,9 @@ public class FileServer {
         name = n;
         connectedClients = new ArrayList<String>();
         online = true;
+        
+        connectedClients.add("lm1");
+        connectedClients.add("lm2");
         
         try {
             //Gera porto automático TCP
@@ -132,25 +80,24 @@ public class FileServer {
     }
     
     public void processRequests(){
-        Socket socketToClient;
         
-        // Verificar se o socket do servidor foi inicializado
         if (serverSocket == null) return;
         
         System.out.println(name +" Online!");
         
         while(online){
             try {
-                socketToClient = serverSocket.accept();
-                (new AtendeCliente(socketToClient,threadId++)).start();
+                Socket socketToClient = serverSocket.accept();
+                (new ClientRequestHandler(socketToClient,threadId++)).start();
             } catch (IOException ex) {
+                System.out.println("Erro ao aceitar um novo cliente TCP! " + ex);
             } finally{
                 try {
                     serverSocket.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    System.out.println("Erro ao fechar o socket TCP do servidor! " + e);
+                }
             }
         }  
     }
-    
-    //arraylist para guardar clientes ligados?
 }
