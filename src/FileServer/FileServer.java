@@ -42,7 +42,6 @@ class AtendeCliente extends Thread {
                     socketToClient.getInputStream()
                 )
             );
-            
             out = socketToClient.getOutputStream();
             
             clientRequest = in.readLine();
