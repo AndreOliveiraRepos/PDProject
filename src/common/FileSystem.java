@@ -10,10 +10,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,43 +41,34 @@ public class FileSystem implements Serializable{
         
         
     }
-    //monta vistas
-    public void buildTrees(){
-        //test
-        
-    }
-    
-    //gets
-    //sets
-    //fs comands
     
     public void Register(){}
     public void Login(){}
     public void Logout(){}
     
     //operators
-    public void copyFile(String fileName,String destinyPath){
+    public String copyFile(String fileName,String destinyPath){
+        output = "";
         FileChannel source;
         FileChannel destination;
-        if(this.workingDirectory.contains("remote")){
-            //request to server, get response;
+        
+        File s = new File(this.workingDirectory +"/" + fileName);
+        File d = new File(destinyPath +"/" +fileName);
+        try {
+           source = new FileInputStream(s).getChannel();
+           destination = new FileOutputStream(d).getChannel();
+           destination.transferFrom(source, 0, source.size());
+           source.close();
+           destination.close();
+           output+= "File copied to " +destinyPath;
+        } catch (FileNotFoundException ex) {
+            output += "File not found!";
+            return output;
+        } catch (IOException ex) {
+            output += "Data Error!";
+            return output;
         }
-        else{
-            File s = new File(this.workingDirectory +"/" + fileName);
-            File d = new File(destinyPath +"/" +fileName);
-            try {
-               source = new FileInputStream(s).getChannel();
-               destination = new FileOutputStream(d).getChannel();
-               destination.transferFrom(source, 0, source.size());
-               source.close();
-               destination.close();
-                System.out.println("Done!");
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        return output;
         
     }
     
@@ -85,33 +79,51 @@ public class FileSystem implements Serializable{
         
         File s = new File(this.workingDirectory +"/" + fileName);
         File d = new File(destinyPath +"/" +fileName);
-        
-        if(s.exists()){
-            try {
-                source = new FileInputStream(s).getChannel();
-                destination = new FileOutputStream(d).getChannel();
-                destination.transferFrom(source, 0, source.size());
-                source.close();
-                destination.close();
-
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        try {
+            source = new FileInputStream(s).getChannel();
+            destination = new FileOutputStream(d).getChannel();
+            destination.transferFrom(source, 0, source.size());
+            source.close();
+            destination.close();
             s.delete();
             output = fileName +" moved to " + destinyPath;
-        }else{
-            output+= this.workingDirectory +"/" + fileName + " not found!";
+
+        } catch (FileNotFoundException ex) {
+            output += "File not found!";
+            return output;
+        } catch (IOException ex) {
+            output += "Data Error!";
+            return output;
         }
         return output;
     }
     
     public String changeWorkingDirectory(String path){
-        output +="";
-        this.workingDirectory += path;
-        output += "Working Directory is now " + path;
-        return output;
+        output ="";
+        if(path.equalsIgnoreCase("CD..")){
+            //this.workingDirectory.
+            String[] npath = this.workingDirectory.split("/");
+            if(npath.length <= 1){
+                output+= "Working Directory is now " + this.workingDirectory + "/";
+                return output;
+            }
+            else{
+                
+                System.out.println(npath.length);
+                this.workingDirectory = "";
+                for(int i = 0;i < npath.length-1;i++){
+                    
+                    this.workingDirectory+= npath[i] +"/";
+                }
+                output+= "Working Directory is now " + this.workingDirectory;
+                return output;
+            }
+        }
+        else{
+            this.workingDirectory += path;
+            output += "Working Directory is now " + path + "/";
+            return output;
+        }
     }
     public String getWorkingDirContent() {
         output="";
@@ -139,7 +151,34 @@ public class FileSystem implements Serializable{
         return this.workingDirectory;
     }
     //lel
-    public void getFileContent(){}
+    public String getFileContent(String fileName){
+        output = "";
+        
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(this.workingDirectory+"/"+fileName));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+            output = sb.toString();
+            br.close();
+        } catch (FileNotFoundException ex) {
+            output+="File not found";
+        } catch (IOException ex) {
+            output+= "Error reading file!";
+        }
+        /*File f = new File(this.workingDirectory + "/" + fileName);
+        try{
+            output+= Files.readAllLines(f.toPath());
+        } catch (IOException ex) {
+            output+= "Error reading file!";
+        }*/
+        return output;
+    }
     
     public String removeFile(String fileName){
         output = "";
@@ -161,7 +200,7 @@ public class FileSystem implements Serializable{
 
         if(!newDir.exists()){
             newDir.mkdir();
-            output += this.workingDirectory + "/" + path + "created!";
+            output += this.workingDirectory + "/" + path + " created!";
             
         }
         else{

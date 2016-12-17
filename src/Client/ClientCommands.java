@@ -17,6 +17,7 @@ public class ClientCommands {
     public static final String LOGOUT = "LOGOUT";
     public static final String MOVE = "MV";
     public static final String CHANGEDIR = "CD";
+    public static final String BACKDIR = "CD..";
     public static final String GETCONTENTDIR = "LS";
     public static final String GETFILECONTENT = "PICO";
     public static final String MKDIR = "MKDIR";
@@ -33,11 +34,14 @@ public class ClientCommands {
     public String processCommands(Msg msg,FileSystem fs){
         String s = null;
         String[] cmd = msg.getMsg().split("\\s");
-        
-        switch(cmd[0].toUpperCase()){
+        if(fs.getWorkingDirPath().contains("remote"))
+            return this.processRequest(msg);
+        else
+        {
+            switch(cmd[0].toUpperCase()){
                     case COPY:
-                        fs.copyFile(cmd[1],cmd[2]);
-                        break;
+                        
+                            return fs.copyFile(cmd[1],cmd[2]);
                     case REGISTER:
                         fs.Register();
                         break;
@@ -48,30 +52,35 @@ public class ClientCommands {
                         fs.Logout();
                         break;
                     case MOVE:
-                        fs.moveFile(cmd[1],cmd[2]);
-                        break;
+                        return fs.moveFile(cmd[1],cmd[2]);
+                        
                     case CHANGEDIR:
-                        fs.changeWorkingDirectory(cmd[1]);
-                        break;
+                        return fs.changeWorkingDirectory(cmd[1]);
+                    case BACKDIR:
+                        return fs.changeWorkingDirectory(cmd[0]);    
                     case GETCONTENTDIR:
+                        
                         return fs.getWorkingDirContent();
                         
                     case GETFILECONTENT:
-                        fs.getFileContent();
-                        break;
+                        return fs.getFileContent(cmd[1]);
+                        
                     case MKDIR:
                         
-                        fs.makeDir(cmd[1]);
-                        break;
+                        return fs.makeDir(cmd[1]);
+                        
                     case RMFILE:
-                        fs.removeFile(cmd[1]);
-                        break;
+                        
+                        return fs.removeFile(cmd[1]);
                     default:
+                        return "";
+                        
+                    
 
-                        break;
-
+            }
+        
         }
-        return s;
+        return "";
     }
     public String processRequest(Msg msg){
         String[] args = msg.getMsg().split("\\s");
