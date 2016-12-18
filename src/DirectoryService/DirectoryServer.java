@@ -88,13 +88,14 @@ public class DirectoryServer {
                     }
                 }
                 udpListener.sendResponse(clientsAsString.toString());
+                
             }
             else {
                 String[] args = msg.getMsg().split("\\s");
 
                 if (args[0].equalsIgnoreCase(MSG))
                 {
-                    Iterator it = clientManager.getOnlineClients().entrySet().iterator();
+                    Iterator it = clientManager.getOnlineClients().values().iterator();
                     while (it.hasNext()){
                         ClientEntry client = (ClientEntry) it.next();
                         if (serverManager.isAuthenticatedClient(client.getName())){
