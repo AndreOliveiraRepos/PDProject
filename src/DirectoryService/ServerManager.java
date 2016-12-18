@@ -9,13 +9,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class ServerManager extends Thread{
-    public static final int ACCEPTED_INTERVAL = 20; //seconds //34
+public class ServerManager extends Thread
+{
+    public static final int ACCEPTED_INTERVAL = 34; //seconds //34
     
-    protected HashMap<String,ServerEntry> onlineServers;
-    protected boolean running;
+    private HashMap<String,ServerEntry> onlineServers;
+    private boolean running;
     
-    public ServerManager(){
+    public ServerManager()
+    {
         onlineServers = new HashMap<String,ServerEntry>();
         running = true;
     }
@@ -87,5 +89,15 @@ public class ServerManager extends Thread{
     @Override
     public String toString(){
         return onlineServers.toString();
+    }
+    
+    public boolean isAuthenticatedClient(String c){
+        Iterator it = onlineServers.values().iterator();
+        while (it.hasNext()) {
+            if(((ServerEntry)it.next()).existsClient(c)){
+                return true;
+            }
+        }
+        return false;
     }
 }

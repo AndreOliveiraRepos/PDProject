@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 public class HeartbeatSender<T> extends Thread{
-    private final T heartbeat;
+    private T heartbeat;
     private final InetAddress serverAddr;
     private final int serverPort;
     private boolean running;
@@ -30,8 +30,19 @@ public class HeartbeatSender<T> extends Thread{
         running = true;
     }
     
+    public HeartbeatSender(InetAddress serverAddr, int serverPort){
+        this.serverAddr = serverAddr;
+        this.serverPort = serverPort;
+        
+        running = true;
+    }
+    
     public void terminate(){
         running = false;
+    }
+    
+    public void setHeartbeat(T hb){
+        heartbeat = hb;
     }
     
     @Override
@@ -41,16 +52,14 @@ public class HeartbeatSender<T> extends Thread{
             socket = new DatagramSocket();
             socket.setSoTimeout(TIMEOUT_MS);
             
-            bOut = new ByteArrayOutputStream();          
-            out = new ObjectOutputStream(bOut);
-            
-            out.writeObject(heartbeat);
-            out.flush(); out.close();
-            
-            packet = new DatagramPacket(bOut.toByteArray(), bOut.size(), 
-                    serverAddr, serverPort);
-            
             while(running){
+                bOut = new ByteArrayOutputStream();          
+                out = new ObjectOutputStream(bOut);
+                out.writeObject(heartbeat);
+                out.flush();
+            
+                packet = new DatagramPacket(bOut.toByteArray(), bOut.size(), 
+                    serverAddr, serverPort);
                 socket.send(packet);
                 Thread.sleep(HEARTBEAT_INTERVAL_MS);
             }

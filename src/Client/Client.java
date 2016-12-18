@@ -13,10 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Client {
-    public static final String EXIT = "EXIT";
-    public static final String NAME = "NAME";
-    
-    
+    private static final String EXIT = "EXIT";
+    private static final String NAME = "NAME";
+    private static final String CONNECT = "CONNECT";
    
     private static String name;
     private static ClientTcpHandler tcpHandler;
@@ -40,7 +39,6 @@ public class Client {
             InetAddress directoryServerAddr = InetAddress.getByName(args[0]);
             Integer directoryServerPort = Integer.parseInt(args[1]);
             udpHandler = new ClientUdpHandler(directoryServerAddr, directoryServerPort);
-            
             tcpHandler = new ClientTcpHandler();
             
             // Enviar heartbeats UDP ao serviço de directoria
@@ -67,23 +65,27 @@ public class Client {
             while(true){
                 System.out.print("> ");
                 msg = in.readLine();
-                
-                if(msg.equalsIgnoreCase(EXIT)){ 
-                    break; 
+
+                if(msg.equalsIgnoreCase(EXIT)){
+                    break;
                 } else {
                     String[] cmd = msg.split("\\s");
                     if (cmd[0].equalsIgnoreCase(NAME)){
-                        name = cmd[1];
-                        continue;
+                        if (cmd.length == 2){
+                            name = cmd[1];
+                            hbSender.setHeartbeat(new Heartbeat(udpHandler.getLocalPort(),name));
+                            System.out.println("Nome: " + name);
+                            continue;
+                        } else System.out.println("Erro de sintaxe: nome <nome>");
+                    }
+                    else if(cmd[0].equalsIgnoreCase(CONNECT)){
+                        System.out.println(commands.processRequest(new Msg(name, msg)));
+                    }
+                    else{
+                        System.out.println(commands.processCommands(new Msg(name, msg), clientFileSystem));
                     }
                 }
                 
-                // DISTINGUIR ENTRE COMANDO PARA O SERVIÇO DE DIRECTORIA E PARA O TCP
-                //Imprime a resposta ao pedido do serviço de directoria
-                //EXEMPLO
-                // exemplo de uso request ao server UDP  
-                System.out.println(commands.processCommands(new Msg(name, msg),clientFileSystem));
-                //System.out.println(commands.processRequest(new Msg(name, msg)));
             }
             udpHandler.closeSocket();
             tcpHandler.closeSocket();

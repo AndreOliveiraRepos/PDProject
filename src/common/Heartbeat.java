@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Heartbeat implements Serializable{
     private final int port;
-    private final String name;
+    private String name;
     
     public Heartbeat(int p, String n){
         this.port = p;
@@ -17,5 +17,9 @@ public class Heartbeat implements Serializable{
     
     public String getName(){
         return name;
+    }
+    
+    public void setName(String n){
+        name = n;
     }
 }

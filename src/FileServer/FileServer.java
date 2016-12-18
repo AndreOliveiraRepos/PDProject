@@ -48,7 +48,7 @@ class AtendeCliente extends Thread {
             System.out.println("Pedido recebido: "+clientRequest);
             
             // Enviar resposta ao cliente
-            resposta = "O servidor recebeu o pedido" + clientRequest;
+            resposta = "O servidor recebeu o pedido: " + clientRequest;
             out.write(resposta.getBytes(),0,resposta.length());
             out.flush();
             
@@ -88,7 +88,7 @@ public class FileServer {
         
         try {
             //Gera porto automático TCP
-            serverSocket = new ServerSocket(0); //0 //7001
+            serverSocket = new ServerSocket(7001); //0 //7001
         } catch (IOException ex) {
             System.out.println("Ocorreu um erro no acesso ao socket:\n\t"+ex);
         }
@@ -111,7 +111,7 @@ public class FileServer {
             
             //Inicializar heartbeat/Packets UDP
             hbSender = new HeartbeatSender<ServerHeartbeat>(
-                new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients),
+                new ServerHeartbeat(serverSocket.getInetAddress(), serverSocket.getLocalPort(),name,connectedClients),
                 directoryServerAddr, directoryServerPort);
             hbSender.setDaemon(true);
             hbSender.start();
