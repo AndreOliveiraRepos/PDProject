@@ -38,9 +38,11 @@ public class ClientManager extends Thread {
             if (!onlineClients.isEmpty())
             {
                 Iterator it = onlineClients.entrySet().iterator();
+                System.out.println("Connected Clients:");
                 while(it.hasNext())
                 {
-                    Map.Entry<String,ClientEntry> entry = (Map.Entry)it.next();  
+                    Map.Entry<String,ClientEntry> entry = (Map.Entry)it.next();
+                    System.out.println("\t" + entry.getKey());
                     double timestampSeconds = (double)entry.getValue().getTimestamp() / 1000000000.0;
                     double systemSeconds = (double)System.nanoTime() / 1000000000.0;
                     if((systemSeconds - timestampSeconds) > ACCEPTED_INTERVAL){

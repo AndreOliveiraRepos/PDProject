@@ -12,8 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Client {
-    public static final String EXIT = "EXIT";
-    public static final String NAME = "NAME";
+    private static final String EXIT = "EXIT";
+    private static final String NAME = "NAME";
    
     private static String name;
     
@@ -64,13 +64,14 @@ public class Client {
                 System.out.print("> ");
                 msg = in.readLine();
 
-                if(msg.equalsIgnoreCase(EXIT)){ 
-                    break; 
+                if(msg.equalsIgnoreCase(EXIT)){
+                    break;
                 } else {
                     String[] cmd = msg.split("\\s");
                     if (cmd[0].equalsIgnoreCase(NAME)){
                         if (cmd.length == 2){
                             name = cmd[1];
+                            hbSender.setHeartbeat(new Heartbeat(udpHandler.getLocalPort(),name));
                             System.out.println("Nome: " + name);
                             continue;
                         } else System.out.println("Erro de sintaxe: nome <nome>");
