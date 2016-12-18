@@ -6,7 +6,6 @@
 package DirectoryService;
 
 import common.Heartbeat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,6 +14,7 @@ import java.util.Map;
  *
  * @author luism
  */
+
 public class ClientManager extends Thread {
     
     private static final int ACCEPTED_INTERVAL = 34; //seconds //34
@@ -38,11 +38,10 @@ public class ClientManager extends Thread {
             if (!onlineClients.isEmpty())
             {
                 Iterator it = onlineClients.entrySet().iterator();
-                System.out.println("Connected Clients:");
                 while(it.hasNext())
                 {
                     Map.Entry<String,ClientEntry> entry = (Map.Entry)it.next();
-                    System.out.println("\t" + entry.getKey());
+                    //System.out.println("\t" + entry.getKey());
                     double timestampSeconds = (double)entry.getValue().getTimestamp() / 1000000000.0;
                     double systemSeconds = (double)System.nanoTime() / 1000000000.0;
                     if((systemSeconds - timestampSeconds) > ACCEPTED_INTERVAL){
