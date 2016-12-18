@@ -39,6 +39,7 @@ public class ClientCommands {
         else if (args[0].equalsIgnoreCase("CONNECT")){
             if (args.length == 3){
                 //connect 127.0.0.1 7001
+                System.out.println("jkj");
                 tcpHandler.connectToServer(InetAddress.getByName(args[1]), Integer.parseInt(args[2]));
                 System.out.println(
                     tcpHandler.sendRequest("Pedido teste")
