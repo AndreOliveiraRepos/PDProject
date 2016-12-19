@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 
 public class ServerUdpListener {
@@ -15,6 +16,7 @@ public class ServerUdpListener {
     private DatagramSocket socket;
     private DatagramPacket packet;
     private boolean listening;
+    private InetAddress connectedAddr;
     
     public ServerUdpListener(){
         listening = true;
@@ -27,11 +29,16 @@ public class ServerUdpListener {
         }
     }
     
+    public InetAddress getCurrentAddr(){
+        return connectedAddr;
+    }
+    
     protected Object handleRequests() throws IOException, ClassNotFoundException
     {
         ObjectInputStream in;
         packet = new DatagramPacket(new byte[MAX_SIZE], MAX_SIZE);
         socket.receive(packet);
+        System.out.println("\tIP: " + packet.getAddress());
         in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
         return in.readObject();
     }

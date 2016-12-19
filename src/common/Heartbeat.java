@@ -5,7 +5,7 @@ import java.net.InetAddress;
 
 public class Heartbeat implements Serializable
 {
-    private final InetAddress address;
+    private InetAddress address;
     private final int port;
     private String name;
     
@@ -14,6 +14,11 @@ public class Heartbeat implements Serializable
         this.port = p;
         this.name = n;
     }
+    
+    public void setAddr(InetAddress addr){
+        address = addr;
+    }
+    
     public InetAddress getAddr(){
         return address;
     }

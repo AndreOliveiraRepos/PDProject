@@ -4,6 +4,8 @@
 package DirectoryService;
 
 import FileServer.ServerHeartbeat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -60,8 +62,12 @@ public class ServerManager extends Thread
         running = false;
     }
     
-    public Set<ServerEntry> getServerList(){
-        return (Set<ServerEntry>) onlineServers.values();
+    public ArrayList<ServerEntry> getServerList(){
+        //return onlineServers.values();
+        ArrayList<ServerEntry> arr = new ArrayList<ServerEntry>();
+        Iterator it = onlineServers.values().iterator();
+        while(it.hasNext()) arr.add((ServerEntry)it.next());
+        return arr;
     }
     
     public String getServerListAsString(){

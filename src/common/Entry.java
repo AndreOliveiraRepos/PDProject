@@ -3,9 +3,10 @@
 */
 package common;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 
-public class Entry {
+public class Entry implements Serializable{
     protected String name;
     protected InetAddress address;
     protected int port;
@@ -31,6 +32,10 @@ public class Entry {
     
     public InetAddress getAddr(){
         return address;
+    }
+    
+    public void setAddr(InetAddress addr){
+        address = addr;
     }
     
     public int getPort(){

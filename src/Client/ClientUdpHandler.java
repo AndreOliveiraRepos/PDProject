@@ -11,14 +11,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ClientUdpHandler{
     public static final int MAX_SIZE = 1000;
@@ -27,7 +22,7 @@ public class ClientUdpHandler{
     
     InetAddress directoryServerAddr;
     Integer directoryServerPort;
-    HashSet<ServerEntry> availableServers;
+    ArrayList<ServerEntry> availableServers;
     
     public ClientUdpHandler(InetAddress dirServerAddr, Integer dirServerPort){
         try 
@@ -43,7 +38,7 @@ public class ClientUdpHandler{
         directoryServerAddr = dirServerAddr;
         directoryServerPort = dirServerPort;
         
-        availableServers = new HashSet<ServerEntry>();
+        availableServers = new ArrayList<ServerEntry>();
     }
     
     public int getLocalPort(){
@@ -80,11 +75,9 @@ public class ClientUdpHandler{
 
         if (obj instanceof String){
             return (String)obj;
-        } else if (obj instanceof Set) {
-            //availableServers = (Set)obj;
-            //return getAvailableServers();
-            Set<ServerEntry> _set = (Set<ServerEntry>)obj;
-            return _set.toString();
+        } else if (obj instanceof ArrayList) {
+            availableServers = (ArrayList)obj;
+            return getAvailableServers();
         }else {
             System.out.println("Erro: Objecto recebido do tipo inesperado!");
         }

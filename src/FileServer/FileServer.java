@@ -47,6 +47,7 @@ class AtendeCliente extends Thread {
                     )
                 );
                 out = socketToClient.getOutputStream();
+                System.out.println(socketToClient.getLocalAddress());
 
                 clientRequest = in.readLine();
                 System.out.println("Pedido recebido: "+clientRequest);
@@ -119,15 +120,18 @@ public class FileServer {
             );
             
             //Inicializar heartbeat/Packets UDP
-            hbSender = new HeartbeatSender<ServerHeartbeat>(
-                new ServerHeartbeat(serverSocket.getInetAddress(), serverSocket.getLocalPort(),name,connectedClients),
-                directoryServerAddr, directoryServerPort);
+            hbSender = new HeartbeatSender<ServerHeartbeat>(directoryServerAddr, directoryServerPort);
             hbSender.setDaemon(true);
             hbSender.start();
             
+            hbSender.setHeartbeat(
+                new ServerHeartbeat(hbSender.getLocalAddr(), serverSocket.getLocalPort(),name,connectedClients)
+            );
             fserver.processRequests();
             //Esperar que a thread termine
             hbSender.join();
+            
+            
             
         } catch (UnknownHostException ex) {
             System.out.println("Destino desconhecido:\n\t"+ex);
@@ -147,7 +151,6 @@ public class FileServer {
         if (serverSocket == null) return;
         
         System.out.println(name +" Online!");
-        
         
             try {
                 while(online){

@@ -62,8 +62,11 @@ public class DirectoryServer {
         
         private void processRequest(Object obj) throws IOException
         {
-            if (obj instanceof ServerHeartbeat)
-                serverManager.processHeartbeat((ServerHeartbeat)obj);  
+            if (obj instanceof ServerHeartbeat){
+                ServerHeartbeat hb = (ServerHeartbeat)obj;
+                hb.setAddr(udpListener.getCurrentAddr());
+                serverManager.processHeartbeat((ServerHeartbeat)obj);
+            }
             else if (obj instanceof Heartbeat)
                 clientManager.processHeartbeat((Heartbeat)obj);
             else if (obj instanceof Msg)
