@@ -30,7 +30,7 @@ class AtendeCliente implements Runnable {
     public static final String CHANGEDIR = "CD";
     public static final String BACKDIR = "CD..";
     public static final String GETCONTENTDIR = "LS";
-    public static final String GETFILECONTENT = "PICO";
+    public static final String GETFILECONTENT = "CAT";
     public static final String MKDIR = "MKDIR";
     public static final String RMFILE = "RM";
     
@@ -57,6 +57,7 @@ class AtendeCliente implements Runnable {
         String clientRequest = null;
         String resposta = null;
         String convertedPath;
+        File f;
         boolean wtrue = true;
         try{
             while(wtrue){
@@ -94,18 +95,40 @@ class AtendeCliente implements Runnable {
                     case CHANGEDIR:
                         //resposta = serverFileSystem.changeWorkingDirectory(cmd[1]);
                         convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
-                        File f = new File(convertedPath);
+                        f = new File(convertedPath);
                         
                         if(f.exists()){
                             
                             resposta = cmd[1];
                         }
                         else{
-                            resposta = "remote"+serverName+"/temp/";
+                            resposta = "remote"+serverName+"/temp";
                         }
                         break;
                     case BACKDIR:
-                        resposta = serverFileSystem.changeWorkingDirectory(cmd[0]);
+                        //resposta = serverFileSystem.changeWorkingDirectory(cmd[0]);
+                        convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
+                        f = new File(convertedPath);
+                        if(f.exists()){
+                            String[] npath = cmd[1].split("/");
+                            if(npath.length <= 2){
+                                
+                                resposta = "remote"+serverName+"/temp";
+                            }
+                            else{
+
+
+                                resposta = "";
+                                for(int i = 0;i < npath.length-1;i++){
+
+                                    resposta+= npath[i] + "/";
+                                }
+                                //resposta = convertedPath;
+                            }
+                        }
+                        else{
+                            resposta = "remote"+serverName+"/temp";
+                        }
                         break;
                     default:
                         break;

@@ -24,7 +24,7 @@ public class ClientCommands {
     public static final String CHANGEDIR = "CD";
     public static final String BACKDIR = "CD..";
     public static final String GETCONTENTDIR = "LS";
-    public static final String GETFILECONTENT = "PICO";
+    public static final String GETFILECONTENT = "CAT";
     public static final String MKDIR = "MKDIR";
     public static final String RMFILE = "RM";
     
@@ -64,7 +64,7 @@ public class ClientCommands {
                             
                             fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd " + fs.getRemoteWorkingDir()+"/" + cmd[2]),fs));
                             //System.out.println("AQUI resultado cd:" + fs.getRemoteWorkingDir());
-                            s+=fs.getRemoteWorkingDir();
+                            s+="AQUI: " + fs.getRemoteWorkingDir();
                             
                         }else{
                             s+=fs.changeWorkingDirectory(cmd[1]);
@@ -72,7 +72,8 @@ public class ClientCommands {
                         return s; 
                     case BACKDIR:
                         if(cmd.length> 1 && cmd[1].contains("remote")){
-                            fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd.."),fs));
+                            fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd.. " + fs.getRemoteWorkingDir() ),fs));
+                            s+= fs.getRemoteWorkingDir();
                         }else{
                             s+= fs.changeWorkingDirectory(cmd[0]); 
                         }
