@@ -4,13 +4,11 @@
 package DirectoryService;
 
 import FileServer.ServerHeartbeat;
+import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ServerManager extends Thread
 {
@@ -25,8 +23,8 @@ public class ServerManager extends Thread
         running = true;
     }
     
-    public void processHeartbeat(ServerHeartbeat hb){
-        ServerEntry se = new ServerEntry(hb);
+    public void processHeartbeat(ServerHeartbeat hb, InetAddress hbAddr){
+        ServerEntry se = new ServerEntry(hb, hbAddr);
         onlineServers.put(se.getName(),se);
     }
     

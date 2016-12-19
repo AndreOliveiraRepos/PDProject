@@ -14,14 +14,14 @@ public class Entry implements Serializable{
     
     public Entry(String n, InetAddress addr, int p, long t){
         name = n;
-        address = addr;
         port = p;
+        address = addr;
         timestamp = t;
     }
     
-    public Entry(Heartbeat hb){
+    public Entry(Heartbeat hb, InetAddress hbAddr){
         name = hb.getName();
-        address = hb.getAddr();
+        address = hbAddr;
         port = hb.getPort();
         timestamp = System.nanoTime();
     }

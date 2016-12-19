@@ -4,7 +4,6 @@ import FileServer.ServerHeartbeat;
 import common.Heartbeat;
 import common.Msg;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 public class DirectoryServer {
@@ -64,11 +63,12 @@ public class DirectoryServer {
         {
             if (obj instanceof ServerHeartbeat){
                 ServerHeartbeat hb = (ServerHeartbeat)obj;
-                hb.setAddr(udpListener.getCurrentAddr());
-                serverManager.processHeartbeat((ServerHeartbeat)obj);
+                serverManager.processHeartbeat(hb, udpListener.getCurrentAddr());
             }
-            else if (obj instanceof Heartbeat)
-                clientManager.processHeartbeat((Heartbeat)obj);
+            else if (obj instanceof Heartbeat){
+                Heartbeat hb = (Heartbeat)obj;
+                clientManager.processHeartbeat(hb,udpListener.getCurrentAddr());
+            }
             else if (obj instanceof Msg)
                 processCommand((Msg)obj);
             else if (obj instanceof String)
@@ -103,7 +103,7 @@ public class DirectoryServer {
                         if (serverManager.isAuthenticatedClient(client.getName())){
                             chatService.sendMessage(
                                 client.getName() + ": " + args[1],
-                                client.getClientAddr(), client.getPort());
+                                client.getAddr(), client.getPort());
                         }
                     }
                     udpListener.sendResponse("\n");

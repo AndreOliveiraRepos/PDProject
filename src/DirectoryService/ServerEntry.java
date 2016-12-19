@@ -8,11 +8,10 @@ import java.util.ArrayList;
 public class ServerEntry extends common.Entry implements Serializable{
     
     private ArrayList<String> connectedClients;
-    private InetAddress serverAddr;
     
-    public ServerEntry(ServerHeartbeat hb){
+    public ServerEntry(ServerHeartbeat hb, InetAddress hbAddr){
         // Cria uma entrada de registo selando-a com o tempo actual.
-        super(hb);
+        super(hb, hbAddr);
         connectedClients = hb.getConnectedClients();
     }
     

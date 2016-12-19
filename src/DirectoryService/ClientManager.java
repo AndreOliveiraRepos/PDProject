@@ -6,14 +6,10 @@
 package DirectoryService;
 
 import common.Heartbeat;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-/**
- *
- * @author luism
- */
 
 public class ClientManager extends Thread {
     
@@ -27,8 +23,8 @@ public class ClientManager extends Thread {
         running = true;
     }
     
-    public void processHeartbeat(Heartbeat hb){
-        ClientEntry ce = new ClientEntry(hb);
+    public void processHeartbeat(Heartbeat hb, InetAddress hbAddr){
+        ClientEntry ce = new ClientEntry(hb, hbAddr);
         onlineClients.put(ce.getName(),ce);
     }
     

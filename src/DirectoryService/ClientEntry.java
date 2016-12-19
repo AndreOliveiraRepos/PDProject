@@ -8,19 +8,9 @@ package DirectoryService;
 import common.Heartbeat;
 import java.net.InetAddress;
 
-/**
- *
- * @author luism
- */
 public class ClientEntry extends common.Entry{
-    
-    private InetAddress cliAddr;
-    
-    public ClientEntry(Heartbeat hb) {
-        super(hb);
-    }
-    
-    public InetAddress getClientAddr(){
-        return cliAddr;
+        
+    public ClientEntry(Heartbeat hb, InetAddress hbAddr) {
+        super(hb, hbAddr);
     }
 }

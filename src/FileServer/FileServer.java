@@ -125,7 +125,7 @@ public class FileServer {
             hbSender.start();
             
             hbSender.setHeartbeat(
-                new ServerHeartbeat(hbSender.getLocalAddr(), serverSocket.getLocalPort(),name,connectedClients)
+                new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients)
             );
             fserver.processRequests();
             //Esperar que a thread termine

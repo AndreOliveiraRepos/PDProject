@@ -1,26 +1,15 @@
 package common;
 
 import java.io.Serializable;
-import java.net.InetAddress;
 
 public class Heartbeat implements Serializable
 {
-    private InetAddress address;
     private final int port;
     private String name;
     
-    public Heartbeat(InetAddress addr, int p, String n){
-        this.address = addr;
+    public Heartbeat(int p, String n){
         this.port = p;
         this.name = n;
-    }
-    
-    public void setAddr(InetAddress addr){
-        address = addr;
-    }
-    
-    public InetAddress getAddr(){
-        return address;
     }
     
     public int getPort(){

@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Client {
     private static final String EXIT = "EXIT";
@@ -44,7 +42,7 @@ public class Client {
             
             // Enviar heartbeats UDP ao serviço de directoria
             hbSender = new HeartbeatSender<Heartbeat>(
-                    new Heartbeat(udpListener.getLocalAddr(),udpListener.getListeningPort(),name),
+                    new Heartbeat(udpListener.getListeningPort(),name),
                     directoryServerAddr, directoryServerPort);
             hbSender.setDaemon(true);
             hbSender.start();
@@ -76,7 +74,7 @@ public class Client {
                     if (cmd[0].equalsIgnoreCase(NAME)){
                         if (cmd.length == 2){
                             name = cmd[1];
-                            hbSender.setHeartbeat(new Heartbeat(udpListener.getLocalAddr(), udpListener.getListeningPort(),name));
+                            hbSender.setHeartbeat(new Heartbeat(udpListener.getListeningPort(),name));
                             System.out.println("Nome: " + name);
                             continue;
                         } else System.out.println("Erro de sintaxe: nome <nome>");
