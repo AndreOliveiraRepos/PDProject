@@ -21,7 +21,7 @@ public class Client {
     private static HeartbeatSender<Heartbeat> hbSender;
         
     public static void main(String[] args) {
-        String msg;
+        
         Client observer = new Client();
         
         if(args.length != 2){
@@ -60,16 +60,16 @@ public class Client {
             MSGTO luis -> envia uma mensagem ao luis
             ... o resto dos comandos são enviados ao tcp
             */
-
+            
+            String msg;
             ClientCommands commands = new ClientCommands(udpHandler,tcpHandler);
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true){
                 System.out.print("> ");
                 msg = in.readLine();
 
-                if(msg.equalsIgnoreCase(EXIT)){
-                    break;
-                } else {
+                if(msg.equalsIgnoreCase(EXIT)) break;
+                else {
                     String[] cmd = msg.split("\\s");
                     if (cmd[0].equalsIgnoreCase(NAME)){
                         if (cmd.length == 2){
@@ -97,7 +97,7 @@ public class Client {
         System.out.println("Erro: " + e);
     }
     
-    public void println(String s){
+    public void printContent(String s){
         System.out.println(s);
     }
 }

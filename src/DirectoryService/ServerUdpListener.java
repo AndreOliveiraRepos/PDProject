@@ -38,6 +38,7 @@ public class ServerUdpListener {
         ObjectInputStream in;
         packet = new DatagramPacket(new byte[MAX_SIZE], MAX_SIZE);
         socket.receive(packet);
+        lastConnectedAddr = packet.getAddress();
         in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
         return in.readObject();
     }

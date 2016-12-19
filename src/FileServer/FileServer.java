@@ -85,6 +85,7 @@ public class FileServer {
     private static ServerSocket serverSocket;  //TCP Server
     
     private static ArrayList<String> connectedClients;
+    
     //directory
     
     public FileServer(String n, InetAddress dirAddr, int dirPort) {
@@ -118,6 +119,9 @@ public class FileServer {
                     InetAddress.getByName(args[1]),
                     Integer.parseInt(args[2])
             );
+            
+            connectedClients.add("Carlos");
+            connectedClients.add("va ok, ola");
             
             //Inicializar heartbeat/Packets UDP
             hbSender = new HeartbeatSender<ServerHeartbeat>(directoryServerAddr, directoryServerPort);

@@ -4,6 +4,7 @@ import FileServer.ServerHeartbeat;
 import common.Heartbeat;
 import common.Msg;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.Iterator;
 
 public class DirectoryServer {
@@ -23,6 +24,13 @@ public class DirectoryServer {
         clientManager = new ClientManager();
         clientManager.setDaemon(true);
         clientManager.start();
+        
+        try {
+            RMIService rmiService = new RMIService(serverManager);
+            rmiService.run();
+        } catch (RemoteException ex) {
+            System.out.println("Erro ao iniciar o servico RMI! " + ex);
+        }
     }
     
     private static class UdpRequestHandler extends Thread {

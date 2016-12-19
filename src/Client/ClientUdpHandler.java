@@ -12,7 +12,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 
 public class ClientUdpHandler{
@@ -95,8 +94,7 @@ public class ClientUdpHandler{
         buff.append("\n");
         while (it.hasNext()) {
             ServerEntry se = (ServerEntry)it.next();
-            //buff.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
-            buff.append(se.getName() + "\t" + se.getAddr() + "\t" + se.getPort() + "\n");
+            buff.append(se.getName() + "\t" + se.getAddr().getHostAddress() + "\t" + se.getPort() + "\n");
         }
         return buff.toString();
     }
