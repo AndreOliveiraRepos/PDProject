@@ -5,6 +5,7 @@ import common.HeartbeatSender;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 class AtendeCliente extends Thread {
     
     public static final int MAX_SIZE = 4000;
+    public static boolean listenning;
     
     Socket socketToClient;
     int myId;
@@ -22,6 +24,7 @@ class AtendeCliente extends Thread {
     public AtendeCliente(Socket s, int id){
         socketToClient = s;
         myId = id;
+        listenning = true;
     }
     
     @Override
@@ -36,21 +39,27 @@ class AtendeCliente extends Thread {
         String resposta = null;
         
         try{
-            // Streams de entrada e saída via TCP
-            in = new BufferedReader(
-                new InputStreamReader(
-                    socketToClient.getInputStream()
-                )
-            );
-            out = socketToClient.getOutputStream();
-            
-            clientRequest = in.readLine();
-            System.out.println("Pedido recebido: "+clientRequest);
-            
-            // Enviar resposta ao cliente
-            resposta = "O servidor recebeu o pedido: " + clientRequest;
-            out.write(resposta.getBytes(),0,resposta.length());
-            out.flush();
+            while(listenning){
+                // Streams de entrada e saída via TCP
+                in = new BufferedReader(
+                    new InputStreamReader(
+                        socketToClient.getInputStream()
+                    )
+                );
+                out = socketToClient.getOutputStream();
+
+                clientRequest = in.readLine();
+                System.out.println("Pedido recebido: "+clientRequest);
+
+                // Enviar resposta ao cliente
+                resposta = "O servidor recebeu o pedido: " + clientRequest;
+                ObjectOutputStream oOut = new ObjectOutputStream(out);
+                
+                //out.write(resposta.getBytes(),0,resposta.length());
+                //out.flush();
+                oOut.writeObject(resposta);
+                oOut.flush();
+            }
             
         }catch(IOException e){
             System.out.println("Ocorreu a excepcao de E/S: \n\t" + e);                       
@@ -139,17 +148,19 @@ public class FileServer {
         
         System.out.println(name +" Online!");
         
-        while(online){
+        
             try {
-                socketToClient = serverSocket.accept();
-                (new AtendeCliente(socketToClient,threadId++)).start();
+                while(online){
+                    socketToClient = serverSocket.accept();
+                    (new AtendeCliente(socketToClient,threadId++)).start();
+                }
             } catch (IOException ex) {
             } finally{
                 try {
                     serverSocket.close();
                 } catch (IOException e) {}
             }
-        }  
+          
     }
     
     //arraylist para guardar clientes ligados?

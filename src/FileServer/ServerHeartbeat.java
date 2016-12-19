@@ -9,19 +9,13 @@ import java.util.ArrayList;
 
 public class ServerHeartbeat extends Heartbeat implements Serializable{
     private ArrayList<String> connectedClients;
-    private InetAddress serverAddr;
     
     public ServerHeartbeat(InetAddress addr, int p, String n, ArrayList<String> clients){
-        super(p,n);
+        super(addr,p,n);
         this.connectedClients = new ArrayList<String>(clients);
-        serverAddr = addr;
     }
     
     public ArrayList<String> getConnectedClients(){
         return connectedClients;
-    }
-    
-    public InetAddress getServerAddr(){
-        return serverAddr;
     }
 }

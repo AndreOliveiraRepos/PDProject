@@ -1,5 +1,6 @@
 package Client;
 
+import DirectoryService.ServerEntry;
 import common.Msg;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,8 +12,13 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ClientUdpHandler{
     public static final int MAX_SIZE = 1000;
@@ -21,10 +27,11 @@ public class ClientUdpHandler{
     
     InetAddress directoryServerAddr;
     Integer directoryServerPort;
-    Map<String,Integer> availableTcpServers;
+    HashSet<ServerEntry> availableServers;
     
     public ClientUdpHandler(InetAddress dirServerAddr, Integer dirServerPort){
-        try {
+        try 
+        {
             socket = new DatagramSocket(); //Não pode ser 6001, deve de ser () ... automático.
             socket.setSoTimeout(3500);
         } catch(SocketException e){
@@ -36,7 +43,7 @@ public class ClientUdpHandler{
         directoryServerAddr = dirServerAddr;
         directoryServerPort = dirServerPort;
         
-        availableTcpServers = new HashMap<String, Integer>();
+        availableServers = new HashSet<ServerEntry>();
     }
     
     public int getLocalPort(){
@@ -73,9 +80,11 @@ public class ClientUdpHandler{
 
         if (obj instanceof String){
             return (String)obj;
-        } else if (obj instanceof Map) {
-            availableTcpServers = (Map)obj;
-            return availableTcpServers.toString();
+        } else if (obj instanceof Set) {
+            //availableServers = (Set)obj;
+            //return getAvailableServers();
+            Set<ServerEntry> _set = (Set<ServerEntry>)obj;
+            return _set.toString();
         }else {
             System.out.println("Erro: Objecto recebido do tipo inesperado!");
         }
@@ -84,5 +93,18 @@ public class ClientUdpHandler{
     
     public void closeSocket(){
         socket.close();
+    }
+    
+    private String getAvailableServers(){
+        
+        StringBuilder buff = new StringBuilder();
+        Iterator it = availableServers.iterator();
+        buff.append("\n");
+        while (it.hasNext()) {
+            ServerEntry se = (ServerEntry)it.next();
+            //buff.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+            buff.append(se.getName() + "\t" + se.getAddr() + "\t" + se.getPort() + "\n");
+        }
+        return buff.toString();
     }
 }

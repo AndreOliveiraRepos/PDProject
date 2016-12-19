@@ -77,7 +77,7 @@ public class DirectoryServer {
         private void processCommand(Msg msg) throws IOException
         {
             if(msg.getMsg().equalsIgnoreCase(LIST))
-                udpListener.sendResponse(serverManager.getServerMap());
+                udpListener.sendResponse(serverManager.getServerList());
             else if (msg.getMsg().equalsIgnoreCase(USERS)){
                 Iterator it = clientManager.getOnlineClients().keySet().iterator();
                 StringBuilder clientsAsString = new StringBuilder();
@@ -88,7 +88,6 @@ public class DirectoryServer {
                     }
                 }
                 udpListener.sendResponse(clientsAsString.toString());
-                
             }
             else {
                 String[] args = msg.getMsg().split("\\s");

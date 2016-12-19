@@ -1,10 +1,11 @@
 package DirectoryService;
 
 import FileServer.ServerHeartbeat;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
-public class ServerEntry extends common.Entry{
+public class ServerEntry extends common.Entry implements Serializable{
     
     private ArrayList<String> connectedClients;
     private InetAddress serverAddr;

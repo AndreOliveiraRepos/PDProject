@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ServerManager extends Thread
 {
@@ -59,31 +60,20 @@ public class ServerManager extends Thread
         running = false;
     }
     
-    public List<ServerEntry> getOnlineServers(){
-        return (List<ServerEntry>) onlineServers.values();
+    public Set<ServerEntry> getServerList(){
+        return (Set<ServerEntry>) onlineServers.values();
     }
     
-    public Map<String,Integer> getServerMap(){
-//        StringBuilder buffer = new StringBuilder();
-//        Iterator it = onlineServers.entrySet().iterator();
-//        while (it.hasNext()) {
-//            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();  
-//
-//            System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
-//            buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
-//        }
-//        return buffer.toString();*/
-        Map<String,Integer> serversInfo = new HashMap<String,Integer>();
-
-        Iterator it = onlineServers.entrySet().iterator();
+    public String getServerListAsString(){
+        StringBuilder buff = new StringBuilder();
+        Iterator it = onlineServers.values().iterator();
+        buff.append("\n");
         while (it.hasNext()) {
-            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();
-
-            //System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
-            //buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
-            serversInfo.put(entry.getKey(), entry.getValue().getPort());
+            ServerEntry se = (ServerEntry)it.next();
+            //buff.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+            buff.append(se.getName() + "\t" + se.getAddr() + "\t" + se.getPort() + "\n");
         }
-        return serversInfo;
+        return buff.toString();
     }
     
     @Override
@@ -100,4 +90,27 @@ public class ServerManager extends Thread
         }
         return false;
     }
+    
+//    public Map<String,Integer> getServerMap(){
+////        StringBuilder buffer = new StringBuilder();
+////        Iterator it = onlineServers.entrySet().iterator();
+////        while (it.hasNext()) {
+////            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();  
+////
+////            System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
+////            buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+////        }
+////        return buffer.toString();*/
+//        Map<String,Integer> serversInfo = new HashMap<String,Integer>();
+//
+//        Iterator it = onlineServers.entrySet().iterator();
+//        while (it.hasNext()) {
+//            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();
+//
+//            //System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
+//            //buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+//            serversInfo.put(entry.getKey(), entry.getValue().getPort());
+//        }
+//        return serversInfo;
+//    }
 }

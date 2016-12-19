@@ -19,10 +19,12 @@ public class Client {
     
     private static ClientTcpHandler tcpHandler;
     private static ClientUdpHandler udpHandler;
+    private static ClientUdpListener udpListener;
     private static HeartbeatSender<Heartbeat> hbSender;
         
     public static void main(String[] args) {
         String msg;
+        Client observer = new Client();
         
         if(args.length != 2){
             System.out.println("Sintaxe: java Client dirAdress dirUdpPort");
@@ -31,16 +33,19 @@ public class Client {
         
         name = "guest";
         
-        try {
+        try 
+        {
             
-            // Inicializa socket UDP para ler e enviar mensagens ao serviço de directoria
             InetAddress directoryServerAddr = InetAddress.getByName(args[0]);
             Integer directoryServerPort = Integer.parseInt(args[1]);
             udpHandler = new ClientUdpHandler(directoryServerAddr, directoryServerPort);
+            udpListener = new ClientUdpListener(observer);
             tcpHandler = new ClientTcpHandler();
             
             // Enviar heartbeats UDP ao serviço de directoria
-            hbSender = new HeartbeatSender<Heartbeat>(new Heartbeat(udpHandler.getLocalPort(),name),directoryServerAddr, directoryServerPort);
+            hbSender = new HeartbeatSender<Heartbeat>(
+                    new Heartbeat(udpListener.getLocalAddr(),udpListener.getListeningPort(),name),
+                    directoryServerAddr, directoryServerPort);
             hbSender.setDaemon(true);
             hbSender.start();
             
@@ -52,7 +57,7 @@ public class Client {
             /* Exemplo para listagem de comandos
             OK-NAME luis -> altera o nome para luis
             OK-EXIT -> sai (já faz isto no while loop)
-            LIST -> lista os servidores ligados
+            OK-LIST -> lista os servidores ligados
             MSG -> envia uma mensagem a todos os clientes activos
             MSGTO luis -> envia uma mensagem ao luis
             ... o resto dos comandos são enviados ao tcp
@@ -71,7 +76,7 @@ public class Client {
                     if (cmd[0].equalsIgnoreCase(NAME)){
                         if (cmd.length == 2){
                             name = cmd[1];
-                            hbSender.setHeartbeat(new Heartbeat(udpHandler.getLocalPort(),name));
+                            hbSender.setHeartbeat(new Heartbeat(udpListener.getLocalAddr(), udpListener.getListeningPort(),name));
                             System.out.println("Nome: " + name);
                             continue;
                         } else System.out.println("Erro de sintaxe: nome <nome>");
@@ -85,9 +90,16 @@ public class Client {
         } catch (UnknownHostException ex) {
             System.out.println("[Cliente] Destino desconhecido:\n\t"+ex);
         } catch (IOException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }/*catch(ClassNotFoundException e){
              System.out.println("O objecto recebido não é do tipo esperado:\n\t"+e);
         }*/
+    }
+    
+    public void printError(String e){
+        System.out.println("Erro: " + e);
+    }
+    
+    public void println(String s){
+        System.out.println(s);
     }
 }

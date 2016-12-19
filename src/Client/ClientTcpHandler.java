@@ -2,7 +2,9 @@ package Client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -34,7 +36,7 @@ public class ClientTcpHandler {
                 socketToServer.close();
             }
             socketToServer = new Socket(servAddr, servPort);
-            socketToServer.setSoTimeout(TIMEOUT);
+            //socketToServer.setSoTimeout(TIMEOUT);
             return true;
         } catch (IOException e) {
             System.out.println("Ocorreu um erro no acesso ao socket TCP" + ":\n\t"+e);
@@ -42,21 +44,21 @@ public class ClientTcpHandler {
         }
     }
     
-    public String sendRequest(String request) throws IOException{
+    public String sendRequest(String request) throws IOException, ClassNotFoundException{
         PrintWriter pout;
         
         try {
             if(socketToServer == null) return null;
             pout = new PrintWriter(socketToServer.getOutputStream(), true);
             pout.println(request);
-            pout.flush();
+            //pout.flush();
         } catch (IOException ex) {
             System.out.println("Erro: Não foi possível enviar os dados ao servidor via TCP!");
         }
         return getResponse();
     }
     
-    public String getResponse() throws IOException{
+    public String getResponse() throws IOException, ClassNotFoundException{
         // Receber a resposta do servidor (TCP)
             
             //DEBUG - ver se o tcp está funcional
@@ -65,15 +67,18 @@ public class ClientTcpHandler {
             ver os exemplos do marinho
             */
             //String resposta;
-            BufferedReader in_ = new BufferedReader(
+            /*BufferedReader in_ = new BufferedReader(
                     new InputStreamReader(socketToServer.getInputStream())
-            );
+            );*/
+            ObjectInputStream in = new ObjectInputStream(socketToServer.getInputStream());
+            //System.out.println((String)in.readObject());
             
             //resposta = in_.readLine();  
-            return in_.readLine();
+            //return in_.readLine();
             //System.out.println("\n\t"+resposta);
             
             // fim Debug
+            return (String) in.readObject();
     }
     
     public void closeSocket(){

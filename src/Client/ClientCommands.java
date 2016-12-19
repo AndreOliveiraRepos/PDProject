@@ -37,14 +37,18 @@ public class ClientCommands {
             }
         }
         else if (args[0].equalsIgnoreCase("CONNECT")){
-            if (args.length == 3){
+            //if (args.length == 3){
                 //connect 127.0.0.1 7001
-                System.out.println("jkj");
-                tcpHandler.connectToServer(InetAddress.getByName(args[1]), Integer.parseInt(args[2]));
+                //tcpHandler.connectToServer(InetAddress.getByName(args[1]), Integer.parseInt(args[2]));
+                tcpHandler.connectToServer(InetAddress.getByName("127.0.0.1"), Integer.parseInt("7001"));
+            try {
                 System.out.println(
-                    tcpHandler.sendRequest("Pedido teste")
+                        tcpHandler.sendRequest("Pedido teste")
                 );
-            } else System.out.println("Erro de sintaxe: connect <ip> <porto>");
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ClientCommands.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            //} else System.out.println("Erro de sintaxe: connect <ip> <porto>");
         }
         return "";
     }
