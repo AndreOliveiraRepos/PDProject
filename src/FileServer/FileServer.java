@@ -4,6 +4,7 @@ import common.FileSystem;
 import common.Heartbeat;
 import common.HeartbeatSender;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
@@ -55,6 +56,7 @@ class AtendeCliente implements Runnable {
         
         String clientRequest = null;
         String resposta = null;
+        String convertedPath;
         boolean wtrue = true;
         try{
             while(wtrue){
@@ -68,6 +70,7 @@ class AtendeCliente implements Runnable {
 
                 clientRequest = in.readLine();
                 System.out.println("Pedido recebido: "+clientRequest);
+                convertedPath = "";
                 String[] cmd = clientRequest.split("\\s");
                 //String[] path;
                 
@@ -76,16 +79,30 @@ class AtendeCliente implements Runnable {
                 
                 switch(cmd[0].toUpperCase()){
                     case "HOME":
-                        resposta = "remote"+serverName+"/temp/";
+                        resposta = "remote"+serverName+"/temp";
                         
                         break;
                     case GETCONTENTDIR:
-
-                        resposta = "Listing for server "+ cmd[1]+ ":\n" + serverFileSystem.getWorkingDirContent();
+                        
+                        convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
+                        resposta = "Listing for server "+ cmd[1]+ ":\n";
+                        resposta += serverFileSystem.getDirContent(convertedPath);
+                        
+                        
                         
                         break;
                     case CHANGEDIR:
-                        resposta = serverFileSystem.changeWorkingDirectory(cmd[1]);
+                        //resposta = serverFileSystem.changeWorkingDirectory(cmd[1]);
+                        convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
+                        File f = new File(convertedPath);
+                        
+                        if(f.exists()){
+                            
+                            resposta = cmd[1];
+                        }
+                        else{
+                            resposta = "remote"+serverName+"/temp/";
+                        }
                         break;
                     case BACKDIR:
                         resposta = serverFileSystem.changeWorkingDirectory(cmd[0]);
@@ -96,7 +113,7 @@ class AtendeCliente implements Runnable {
                 
                 ObjectOutputStream oout = new ObjectOutputStream(out);
                 oout.writeObject(resposta);
-                System.out.println("Resposta enviada");
+                System.out.println("Resposta enviada: " + resposta);
                 
                 
                 

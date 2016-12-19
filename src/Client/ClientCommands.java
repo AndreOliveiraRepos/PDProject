@@ -60,9 +60,10 @@ public class ClientCommands {
                         
                     case CHANGEDIR:
                         if(cmd[1].contains("remote") && cmd.length > 2){
+                           
                             
-                            
-                            fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd "+ cmd[2]),fs));
+                            fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd " + fs.getRemoteWorkingDir()+"/" + cmd[2]),fs));
+                            //System.out.println("AQUI resultado cd:" + fs.getRemoteWorkingDir());
                             s+=fs.getRemoteWorkingDir();
                             
                         }else{
@@ -70,16 +71,17 @@ public class ClientCommands {
                         }
                         return s; 
                     case BACKDIR:
-                        if(cmd[1].contains("remote")){
+                        if(cmd.length> 1 && cmd[1].contains("remote")){
                             fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd.."),fs));
                         }else{
                             s+= fs.changeWorkingDirectory(cmd[0]); 
-                        }   
+                        }
+                        return s;
                     case GETCONTENTDIR:
-                        
+                        System.out.println("REMOTE:"+fs.getRemoteWorkingDir());
                         s+= processRequest(new Msg(msg.getName(),"ls "+ fs.getRemoteWorkingDir()),fs);
                         s+="Listing local\n";
-                        s+= fs.getWorkingDirContent();
+                        s+= fs.getDirContent(fs.getWorkingDirPath());
                         return s;        
                     case GETFILECONTENT:
                         return fs.getFileContent(cmd[1]);

@@ -35,7 +35,7 @@ public class FileSystem implements Serializable{
     public FileSystem(String name){
         this.ownerName = name;
         //this.localHomeDir = "C:\\temp\\"+clientName;
-        this.localHomeDir = "C:/temp/";
+        this.localHomeDir = "C:/temp";
         this.workingDirectory = this.localHomeDir;
         
         
@@ -99,6 +99,7 @@ public class FileSystem implements Serializable{
     
     public String changeWorkingDirectory(String path){
         output ="";
+        
         if(path.equalsIgnoreCase("CD..")){
             //this.workingDirectory.
             String[] npath = this.workingDirectory.split("/");
@@ -108,7 +109,7 @@ public class FileSystem implements Serializable{
             }
             else{
                 
-                System.out.println(npath.length);
+                
                 this.workingDirectory = "";
                 for(int i = 0;i < npath.length-1;i++){
                     
@@ -119,18 +120,20 @@ public class FileSystem implements Serializable{
             }
         }
         else{
-            this.workingDirectory += path;
+            //System.out.println("AQUI:" + path);
+            this.workingDirectory += "/" + path;
             output += "Working Directory is now " + path + "/";
             return output;
         }
     }
-    public String getWorkingDirContent() {
+    public String getDirContent(String fullPath) {
         output="";
        
-        File folder = new File(this.workingDirectory);
+        File folder = new File(fullPath);
         File[] listOfFiles = folder.listFiles();
+        
         if(listOfFiles != null){
-            
+            output+=fullPath + "\n";
             for (int i = 0; i < listOfFiles.length; i++) {
                 if (listOfFiles[i].isFile()) {
                   output+="[F]:" + listOfFiles[i].getName() + "\n";
@@ -140,7 +143,8 @@ public class FileSystem implements Serializable{
             }
             //output += "[]";
         }else{
-            output+="empty:";
+            
+            output+=fullPath + "\n"+"empty:";
         }
         
         return output;
