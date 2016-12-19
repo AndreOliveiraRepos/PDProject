@@ -21,9 +21,9 @@ public class Client {
     private static ClientTcpHandler tcpHandler;
     private static ClientUdpHandler udpHandler;
     private static HeartbeatSender<Heartbeat> hbSender;
-    private static FileSystem clientFileSystem;
+    private static FileSystemClient clientFileSystem;
         
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
         String msg;
         
         if(args.length != 2){
@@ -59,7 +59,7 @@ public class Client {
             MSGTO luis -> envia uma mensagem ao luis
             ... o resto dos comandos são enviados ao tcp
             */
-            clientFileSystem = new FileSystem(name);
+            clientFileSystem = new FileSystemClient(name);
             ClientCommands commands = new ClientCommands(udpHandler,tcpHandler);
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true){
@@ -79,11 +79,15 @@ public class Client {
                         } else System.out.println("Erro de sintaxe: nome <nome>");
                     }
                     else if(cmd[0].equalsIgnoreCase(CONNECT)){
-                        System.out.println(commands.processRequest(new Msg(name, msg)));
+                        System.out.println(commands.processRequest(new Msg(name, msg),clientFileSystem));
                     }
                     else{
-                        System.out.println(commands.processCommands(new Msg(name, msg), clientFileSystem));
+                        
+                        System.out.println(commands.processCommands(new Msg(name, msg),clientFileSystem));
                     }
+                    /*else{
+                        System.out.println(commands.processCommands(new Msg(name, msg), clientFileSystem));
+                    }*/
                 }
                 
             }

@@ -3,6 +3,7 @@ package Client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -34,6 +35,7 @@ public class ClientTcpHandler {
                 socketToServer.close();
             }
             socketToServer = new Socket(servAddr, servPort);
+            //socketToServer.setKeepAlive(true);
             socketToServer.setSoTimeout(TIMEOUT);
             return true;
         } catch (IOException e) {
@@ -42,7 +44,7 @@ public class ClientTcpHandler {
         }
     }
     
-    public String sendRequest(String request) throws IOException{
+    public String sendRequest(String request) throws IOException, ClassNotFoundException{
         PrintWriter pout;
         
         try {
@@ -56,7 +58,7 @@ public class ClientTcpHandler {
         return getResponse();
     }
     
-    public String getResponse() throws IOException{
+    public String getResponse() throws IOException, ClassNotFoundException{
         // Receber a resposta do servidor (TCP)
             
             //DEBUG - ver se o tcp está funcional
@@ -65,15 +67,17 @@ public class ClientTcpHandler {
             ver os exemplos do marinho
             */
             //String resposta;
-            BufferedReader in_ = new BufferedReader(
+            /*BufferedReader in_ = new BufferedReader(
                     new InputStreamReader(socketToServer.getInputStream())
-            );
+            );*/
             
             //resposta = in_.readLine();  
-            return in_.readLine();
+            //return in_.readLine();
             //System.out.println("\n\t"+resposta);
+            ObjectInputStream oin = new ObjectInputStream(socketToServer.getInputStream());
             
             // fim Debug
+            return (String)oin.readObject();
     }
     
     public void closeSocket(){

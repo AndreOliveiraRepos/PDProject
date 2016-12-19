@@ -25,16 +25,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileSystem implements Serializable{
-    private String remoteHomeDir;
     private String localHomeDir;
     private String workingDirectory;
-    private String clientName;
-    private String currentServer;
+    private String ownerName;
+    //private String currentServer;
     private String output;
     
     
     public FileSystem(String name){
-        this.clientName = name;
+        this.ownerName = name;
         //this.localHomeDir = "C:\\temp\\"+clientName;
         this.localHomeDir = "C:/temp/";
         this.workingDirectory = this.localHomeDir;
@@ -131,7 +130,7 @@ public class FileSystem implements Serializable{
         File folder = new File(this.workingDirectory);
         File[] listOfFiles = folder.listFiles();
         if(listOfFiles != null){
-            output+="Listing from:" + this.workingDirectory + "\n";
+            
             for (int i = 0; i < listOfFiles.length; i++) {
                 if (listOfFiles[i].isFile()) {
                   output+="[F]:" + listOfFiles[i].getName() + "\n";
@@ -139,6 +138,7 @@ public class FileSystem implements Serializable{
                   output+="[D]:" + listOfFiles[i].getName() + "\n";
                 }
             }
+            //output += "[]";
         }else{
             output+="empty:";
         }
@@ -209,6 +209,8 @@ public class FileSystem implements Serializable{
         }
         return output;
     }
+    
+   
     
     
 }

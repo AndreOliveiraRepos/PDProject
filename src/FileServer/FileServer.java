@@ -1,27 +1,48 @@
 package FileServer;
 
+import common.FileSystem;
 import common.Heartbeat;
 import common.HeartbeatSender;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-class AtendeCliente extends Thread {
+
+
+class AtendeCliente implements Runnable {
     
     public static final int MAX_SIZE = 4000;
+    public static final String COPY = "CP";
+    public static final String REGISTER = "REGISTER";
+    public static final String LOGIN = "LOGIN";
+    public static final String LOGOUT = "LOGOUT";
+    public static final String MOVE = "MV";
+    public static final String CHANGEDIR = "CD";
+    public static final String BACKDIR = "CD..";
+    public static final String GETCONTENTDIR = "LS";
+    public static final String GETFILECONTENT = "PICO";
+    public static final String MKDIR = "MKDIR";
+    public static final String RMFILE = "RM";
     
     Socket socketToClient;
     int myId;
+    String serverName;
+    FileSystem serverFileSystem;
 
-    public AtendeCliente(Socket s, int id){
+    public AtendeCliente(Socket s, int id,String name, FileSystem fs){
         socketToClient = s;
         myId = id;
+        serverName = name;
+        serverFileSystem = fs;
     }
     
     @Override
@@ -34,31 +55,62 @@ class AtendeCliente extends Thread {
         
         String clientRequest = null;
         String resposta = null;
-        
+        boolean wtrue = true;
         try{
+            while(wtrue){
+                
+                in = new BufferedReader(
+                    new InputStreamReader(
+                        socketToClient.getInputStream()
+                    )
+                );
+                out = socketToClient.getOutputStream();
+
+                clientRequest = in.readLine();
+                System.out.println("Pedido recebido: "+clientRequest);
+                String[] cmd = clientRequest.split("\\s");
+                //String[] path;
+                
+                //String convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
+                //System.out.println("replace: " + p);
+                
+                switch(cmd[0].toUpperCase()){
+                    case "HOME":
+                        resposta = "remote"+serverName+"/temp/";
+                        
+                        break;
+                    case GETCONTENTDIR:
+
+                        resposta = "Listing for server "+ cmd[1]+ ":\n" + serverFileSystem.getWorkingDirContent();
+                        
+                        break;
+                    case CHANGEDIR:
+                        resposta = serverFileSystem.changeWorkingDirectory(cmd[1]);
+                        break;
+                    case BACKDIR:
+                        resposta = serverFileSystem.changeWorkingDirectory(cmd[0]);
+                        break;
+                    default:
+                        break;
+                }
+                
+                ObjectOutputStream oout = new ObjectOutputStream(out);
+                oout.writeObject(resposta);
+                System.out.println("Resposta enviada");
+                
+                
+                
+            }
+            socketToClient.close();
             // Streams de entrada e saída via TCP
-            in = new BufferedReader(
-                new InputStreamReader(
-                    socketToClient.getInputStream()
-                )
-            );
-            out = socketToClient.getOutputStream();
-            
-            clientRequest = in.readLine();
-            System.out.println("Pedido recebido: "+clientRequest);
-            
-            // Enviar resposta ao cliente
-            resposta = "O servidor recebeu o pedido: " + clientRequest;
-            out.write(resposta.getBytes(),0,resposta.length());
-            out.flush();
-            
+             
         }catch(IOException e){
             System.out.println("Ocorreu a excepcao de E/S: \n\t" + e);                       
         }
         
-        try{
+        /*try{
              socketToClient.close();
-        } catch (IOException ex) {}
+        } catch (IOException ex) {}*/
     }
 }
 
@@ -75,6 +127,7 @@ public class FileServer {
     private static ServerSocket serverSocket;  //TCP Server
     
     private static ArrayList<String> connectedClients;
+    private static FileSystem serverFileSystem;
     //directory
     
     public FileServer(String n, InetAddress dirAddr, int dirPort) {
@@ -85,6 +138,7 @@ public class FileServer {
         name = n;
         connectedClients = new ArrayList<String>();
         online = true;
+        serverFileSystem = new FileSystem(name);
         
         try {
             //Gera porto automático TCP
@@ -142,13 +196,22 @@ public class FileServer {
         while(online){
             try {
                 socketToClient = serverSocket.accept();
-                (new AtendeCliente(socketToClient,threadId++)).start();
+                
+                //(new AtendeCliente(socketToClient,threadId++,name,serverFileSystem)).start();
+                Thread tt = new Thread((new AtendeCliente(socketToClient,threadId++,name,serverFileSystem)));
+                tt.setDaemon(true);
+                tt.start();
+                tt.join();
+                
             } catch (IOException ex) {
-            } finally{
+            } catch (InterruptedException ex) {
+                Logger.getLogger(FileServer.class.getName()).log(Level.SEVERE, null, ex);
+            }/*finally{
                 try {
                     serverSocket.close();
                 } catch (IOException e) {}
-            }
+            }*/
+            
         }  
     }
     

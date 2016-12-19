@@ -5,6 +5,8 @@ import common.Msg;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,11 +36,11 @@ public class ClientCommands {
         this.udpHandler = udpHandler;
     }
     
-    public String processCommands(Msg msg,FileSystem fs) throws IOException{
-        String s = null;
+    public String processCommands(Msg msg,FileSystemClient fs) throws IOException, ClassNotFoundException{
+        String s = "";
         String[] cmd = msg.getMsg().split("\\s");
         if(fs.getWorkingDirPath().contains("remote"))
-            return this.processRequest(msg);
+            return this.processRequest(msg,fs);
         else
         {
             switch(cmd[0].toUpperCase()){
@@ -57,13 +59,28 @@ public class ClientCommands {
                         return fs.moveFile(cmd[1],cmd[2]);
                         
                     case CHANGEDIR:
-                        return fs.changeWorkingDirectory(cmd[1]);
+                        if(cmd[1].contains("remote") && cmd.length > 2){
+                            
+                            
+                            fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd "+ cmd[2]),fs));
+                            s+=fs.getRemoteWorkingDir();
+                            
+                        }else{
+                            s+=fs.changeWorkingDirectory(cmd[1]);
+                        }
+                        return s; 
                     case BACKDIR:
-                        return fs.changeWorkingDirectory(cmd[0]);    
+                        if(cmd[1].contains("remote")){
+                            fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd.."),fs));
+                        }else{
+                            s+= fs.changeWorkingDirectory(cmd[0]); 
+                        }   
                     case GETCONTENTDIR:
                         
-                        return fs.getWorkingDirContent();
-                        
+                        s+= processRequest(new Msg(msg.getName(),"ls "+ fs.getRemoteWorkingDir()),fs);
+                        s+="Listing local\n";
+                        s+= fs.getWorkingDirContent();
+                        return s;        
                     case GETFILECONTENT:
                         return fs.getFileContent(cmd[1]);
                         
@@ -82,9 +99,9 @@ public class ClientCommands {
             }
         
         }
-        return "";
+        return s;
     }
-    public String processRequest(Msg msg) throws UnknownHostException, IOException{
+    public String processRequest(Msg msg,FileSystemClient fs) throws UnknownHostException, IOException, ClassNotFoundException{
         String[] args = msg.getMsg().split("\\s");
   
         if (args[0].equalsIgnoreCase(LIST)
@@ -102,12 +119,27 @@ public class ClientCommands {
         else if (args[0].equalsIgnoreCase("CONNECT")){
             if (args.length == 3){
                 //connect 127.0.0.1 7001
-                System.out.println("jkj");
+                //on connect manda o pedido de login?
                 tcpHandler.connectToServer(InetAddress.getByName(args[1]), Integer.parseInt(args[2]));
-                System.out.println(
-                    tcpHandler.sendRequest("Pedido teste")
-                );
+                /*System.out.println(
+                    tcpHandler.sendRequest("HOME "+msg.getName())
+                );*/
+                
+                fs.setRemoteWorkingDir(tcpHandler.sendRequest("HOME "+msg.getName()));
+                System.out.println(fs.getRemoteWorkingDir());
             } else System.out.println("Erro de sintaxe: connect <ip> <porto>");
+        }else{
+            
+            //processar outros comandos
+            //System.out.println("AQUI "+msg.getMsg());
+            
+            return tcpHandler.sendRequest(msg.getMsg());
+           /* System.out.println("AQUI "+msg.getMsg());
+            System.out.println(
+                    tcpHandler.sendRequest("HOME "+msg.getName())
+                );*/
+            /*System.out.println("AQUI"+msg.getMsg());
+            return tcpHandler.sendRequest(msg.getMsg());*/
         }
         return "";
     }
