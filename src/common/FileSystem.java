@@ -88,6 +88,7 @@ public class FileSystem implements Serializable{
             output = fileName +" moved to " + destinyPath;
 
         } catch (FileNotFoundException ex) {
+            
             output += "File not found!";
             return output;
         } catch (IOException ex) {
@@ -192,6 +193,7 @@ public class FileSystem implements Serializable{
             f.delete();
             output += "Deleted " + this.workingDirectory + "/" +fileName + " sucessfuly!";
         }else{
+            
             output += "File not found!";
         }
         return output;

@@ -1,25 +1,35 @@
 package FileServer;
 
+import common.FileObject;
 import common.FileSystem;
 import common.Heartbeat;
 import common.HeartbeatSender;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
 
-class AtendeCliente implements Runnable {
+class AtendeCliente extends Thread {
     
     public static final int MAX_SIZE = 4000;
     public static final String COPY = "CP";
@@ -48,109 +58,149 @@ class AtendeCliente implements Runnable {
     
     @Override
     public void run(){
-        BufferedReader in;
-        OutputStream out;
-        
-        /*byte[]fileChunk = new byte[MAX_SIZE];
-        int nbytes;*/
-        
-        String clientRequest = null;
-        String resposta = null;
-        String convertedPath;
-        File f;
+        //BufferedReader in;
         boolean wtrue = true;
-        try{
-            while(wtrue){
-                
-                in = new BufferedReader(
-                    new InputStreamReader(
-                        socketToClient.getInputStream()
-                    )
-                );
-                out = socketToClient.getOutputStream();
-
-                clientRequest = in.readLine();
-                System.out.println("Pedido recebido: "+clientRequest);
-                convertedPath = "";
-                String[] cmd = clientRequest.split("\\s");
-                //String[] path;
-                
-                //String convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
-                //System.out.println("replace: " + p);
-                
-                switch(cmd[0].toUpperCase()){
+        String resposta;
+        String convertedPath;
+        while(wtrue){
+            String clientRequest = (String)this.readData();
+            System.out.println("LEU:" + clientRequest);
+            String[] cmd = clientRequest.split("\\s");
+            switch(cmd[0].toUpperCase()){
                     case "HOME":
+                        
                         resposta = "remote"+serverName+"/temp";
+                        this.writeData(resposta);
+                        System.out.println("SENT:" + resposta);
+                        break;
+                    case COPY:
+                        convertedPath = cmd[2].replace("remote"+serverName+"/","C:/");
+                        System.out.println("PEDIDO: "+clientRequest);
+                        
+                        System.out.println(receiveFile(convertedPath));
+                        
+            
+                        
+            
                         
                         break;
-                    case GETCONTENTDIR:
-                        
-                        convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
-                        resposta = "Listing for server "+ cmd[1]+ ":\n";
-                        resposta += serverFileSystem.getDirContent(convertedPath);
-                        
-                        
-                        
-                        break;
-                    case CHANGEDIR:
-                        //resposta = serverFileSystem.changeWorkingDirectory(cmd[1]);
-                        convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
-                        f = new File(convertedPath);
-                        
-                        if(f.exists()){
-                            
-                            resposta = cmd[1];
-                        }
-                        else{
-                            resposta = "remote"+serverName+"/temp";
-                        }
-                        break;
-                    case BACKDIR:
-                        //resposta = serverFileSystem.changeWorkingDirectory(cmd[0]);
-                        convertedPath = cmd[1].replace("remote"+serverName+"/","C:/");
-                        f = new File(convertedPath);
-                        if(f.exists()){
-                            String[] npath = cmd[1].split("/");
-                            if(npath.length <= 2){
-                                
-                                resposta = "remote"+serverName+"/temp";
-                            }
-                            else{
-
-
-                                resposta = "";
-                                for(int i = 0;i < npath.length-1;i++){
-
-                                    resposta+= npath[i] + "/";
-                                }
-                                //resposta = convertedPath;
-                            }
-                        }
-                        else{
-                            resposta = "remote"+serverName+"/temp";
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                
-                ObjectOutputStream oout = new ObjectOutputStream(out);
-                oout.writeObject(resposta);
-                System.out.println("Resposta enviada: " + resposta);
-                
-                
-                
             }
-            socketToClient.close();
-            // Streams de entrada e saída via TCP
-             
-        }catch(IOException e){
-            System.out.println("Ocorreu a excepcao de E/S: \n\t" + e);                       
         }
         
-        /*try{
-             socketToClient.close();
-        } catch (IOException ex) {}*/
+    }
+    
+    
+    public void writeData(Object obj){
+        try {
+            
+            ObjectOutputStream out = new ObjectOutputStream(socketToClient.getOutputStream());
+            out.writeObject(obj);
+            out.flush();
+        } catch (IOException ex) {
+            System.out.println("Data access error:\n\t"+ex);
+        }
+       
+    }
+    
+    public Object readData(){
+        Object obj = null;
+        try {
+            ObjectInputStream in = new ObjectInputStream(socketToClient.getInputStream());
+            obj = in.readObject();
+        } catch (IOException ex) {
+            System.out.println("Data access error:\n\t"+ex);
+        } catch (ClassNotFoundException ex) {
+            System.out.println("Data access error:\n\t"+ex);
+        }
+        return obj;
+    } 
+    public String receiveFile(String path){
+        
+        
+        FileObject fObj;
+        System.out.println("Writing on " + path);
+        try {
+
+            ObjectInputStream ois = new ObjectInputStream(socketToClient.getInputStream());
+            FileOutputStream fos = new FileOutputStream(Paths.get(path).toString());
+            int contador =0;
+            int nbytes;
+            //nbytes = fin.read(fileChunk);
+            while(true){                    
+                
+                fObj = (FileObject)ois.readObject();
+                System.out.println("Recebido o bloco n. " + ++contador + " com " + fObj.getnBytes() + " bytes.");
+                if(fObj.isIsEOF())
+                    break;
+                
+                
+                fos.write(fObj.getFileChunk(), 0, fObj.getnBytes());
+                System.out.println("Acrescentados " + fObj.getnBytes() + " bytes ao ficheiro " + path+ ".");
+                
+                
+                
+                
+                
+                //System.out.println("EXISTEM" + in.available());
+            }  
+            //
+            fos.flush();
+            fos.close();
+            //in.close();
+            //fos.close();
+            return "Done!";
+        
+        } catch (FileNotFoundException ex) {
+            return "File not Found!";
+        } catch (IOException ex) {
+            return "Erros writing!";
+        } catch (ClassNotFoundException ex) {
+            return "Class not Found!";
+        } 
+        
+    }
+    public String sendFile(String path){
+        byte[] fileChunk = new byte[2048];
+        int nbytes;
+        File fileToSend = new File(path);
+        FileInputStream fin = null;
+        
+        
+        if(fileToSend.exists()){
+            try {
+                OutputStream out = socketToClient.getOutputStream();
+                fin = new FileInputStream(fileToSend.getAbsolutePath());
+                while((nbytes = fin.read(fileChunk))>0){                        
+                        
+                        out.write(fileChunk, 0, nbytes);
+                        out.flush();
+                                                
+                }   
+                fin.close();
+                return "File sent";
+            } catch (FileNotFoundException ex) {
+                return "File not found";
+            } catch (IOException ex) {
+                return "IO exception";
+            }
+        }
+        else{
+            return "File not found!";
+        }
+    }
+
+    public void sendResponse(String resposta){
+        try {
+            
+            //OutputStream out = socketToClient.getOutputStream();
+            ObjectOutputStream oout = new ObjectOutputStream(socketToClient.getOutputStream());
+            oout.writeObject(resposta);
+            oout.flush();
+            //oout.close();
+            System.out.println("Resposta enviada: " + resposta);
+        } catch (IOException ex) {
+            Logger.getLogger(AtendeCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
 
@@ -237,14 +287,14 @@ public class FileServer {
             try {
                 socketToClient = serverSocket.accept();
                 
-                //(new AtendeCliente(socketToClient,threadId++,name,serverFileSystem)).start();
-                Thread tt = new Thread((new AtendeCliente(socketToClient,threadId++,name,serverFileSystem)));
+                (new AtendeCliente(socketToClient,threadId++,name,serverFileSystem)).start();
+                /*Thread tt = new Thread((new AtendeCliente(socketToClient,threadId++,name,serverFileSystem)));
                 tt.setDaemon(true);
                 tt.start();
-                tt.join();
+                tt.join();*/
                 
-            } catch (IOException ex) {
-            } catch (InterruptedException ex) {
+            } catch (IOException ex) {}
+            /*} catch (InterruptedException ex) {
                 Logger.getLogger(FileServer.class.getName()).log(Level.SEVERE, null, ex);
             }/*finally{
                 try {
@@ -254,6 +304,7 @@ public class FileServer {
             
         }  
     }
+    
     
     //arraylist para guardar clientes ligados?
 }

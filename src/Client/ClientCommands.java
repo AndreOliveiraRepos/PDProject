@@ -45,7 +45,32 @@ public class ClientCommands {
         {
             switch(cmd[0].toUpperCase()){
                     case COPY:
-                        return fs.copyFile(cmd[1],cmd[2]);
+                        if(cmd[1].contains("remote") && cmd.length > 3 
+                                && cmd[3].contains("remote")){
+                            //System.out.println("COMANDO: " + "cp "+ fs.getRemoteWorkingDir()+"/"+cmd[2]+" " + cmd[3]+"/"+cmd[2]);
+                            s = processRequest(new Msg(msg.getName(),"cp "+ fs.getRemoteWorkingDir()+"/"+cmd[2]+" " + cmd[3]+"/"+cmd[2]),fs);
+                        }else if(cmd.length > 2 && cmd[2].contains("remote")){
+                            //local para remoto
+                            System.out.println("COMANDO: " + "cp "+ fs.getWorkingDirPath()+"/"+cmd[1]+" " + cmd[2]+"/"+cmd[1]);
+                            //s=processRequest(new Msg(msg.getName(),"cp "+cmd[1]+ " " + cmd[2]+"/"+cmd[1]),fs);
+                            
+                            tcpHandler.writeData("cp "+cmd[1]+ " " + cmd[2]+"/"+cmd[1]);
+                            System.out.println(tcpHandler.sendFile(fs.getWorkingDirPath()+"/"+cmd[1]));
+                            //tcpHandler.sendFile(fs.getWorkingDirPath()+"/"+cmd[1]);
+                            //System.out.println((String)tcpHandler.readData());
+                            /*if(s.equalsIgnoreCase("READY"))
+                                s+=tcpHandler.sendFile(fs.getWorkingDirPath()+"/"+cmd[1]);
+                            else
+                                System.out.println("NOPE!");*/
+                            //s=tcpHandler.sendFile(fs.getWorkingDirPath()+"/"+cmd[1]);
+                        }else if(cmd.length > 1 && cmd[1].contains("remote")){
+                            //remoto para local
+                            System.out.println("COMANDO" + "cp "+ cmd[1]+" local");
+                        }else{    
+                           
+                            s= fs.copyFile(cmd[1],cmd[2]);
+                        }
+                        return s;
                     case REGISTER:
                         fs.Register();
                         break;
@@ -64,18 +89,18 @@ public class ClientCommands {
                             
                             fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd " + fs.getRemoteWorkingDir()+"/" + cmd[2]),fs));
                             //System.out.println("AQUI resultado cd:" + fs.getRemoteWorkingDir());
-                            s+="AQUI: " + fs.getRemoteWorkingDir();
+                            s="AQUI: " + fs.getRemoteWorkingDir();
                             
                         }else{
-                            s+=fs.changeWorkingDirectory(cmd[1]);
+                            s=fs.changeWorkingDirectory(cmd[1]);
                         }
                         return s; 
                     case BACKDIR:
                         if(cmd.length> 1 && cmd[1].contains("remote")){
                             fs.setRemoteWorkingDir(processRequest(new Msg(msg.getName(),"cd.. " + fs.getRemoteWorkingDir() ),fs));
-                            s+= fs.getRemoteWorkingDir();
+                            s= fs.getRemoteWorkingDir();
                         }else{
-                            s+= fs.changeWorkingDirectory(cmd[0]); 
+                            s= fs.changeWorkingDirectory(cmd[0]); 
                         }
                         return s;
                     case GETCONTENTDIR:
@@ -89,11 +114,21 @@ public class ClientCommands {
                         
                     case MKDIR:
                         
-                        return fs.makeDir(cmd[1]);
-                        
+                        if(cmd.length> 2 && cmd[1].contains("remote")){
+                            s+= processRequest(new Msg(msg.getName(),"mkdir "+ fs.getRemoteWorkingDir() +" " + cmd[2]),fs);
+                                  
+                        }else{
+                            
+                            s+= fs.makeDir(cmd[1]);
+                        }
+                        return s;
                     case RMFILE:
-                        
-                        return fs.removeFile(cmd[1]);
+                        if(cmd.length> 2 && cmd[1].contains("remote")){
+                            s+= processRequest(new Msg(msg.getName(),"rm "+ fs.getRemoteWorkingDir() +" " + cmd[2]),fs);
+                                  
+                        }else{
+                            s+= fs.removeFile(cmd[1]);
+                        }
                     default:
                         return "";
                         
@@ -121,30 +156,30 @@ public class ClientCommands {
         }
         else if (args[0].equalsIgnoreCase("CONNECT")){
             if (args.length == 3){
-                //connect 127.0.0.1 7001
-                //on connect manda o pedido de login?
-                tcpHandler.connectToServer(InetAddress.getByName(args[1]), Integer.parseInt(args[2]));
-                /*System.out.println(
-                    tcpHandler.sendRequest("HOME "+msg.getName())
-                );*/
                 
-                fs.setRemoteWorkingDir(tcpHandler.sendRequest("HOME "+msg.getName()));
-                System.out.println(fs.getRemoteWorkingDir());
+                tcpHandler.connectToServer(InetAddress.getByName(args[1]), Integer.parseInt(args[2]));
+                
+                //tcpHandler.writeData("HOME "+msg.getName());
+                String m = "HOME "+msg.getName();
+                
+                tcpHandler.writeData("HOME "+msg.getName());
+                //String req =(String) tcpHandler.readData();
+                fs.setRemoteWorkingDir((String) tcpHandler.readData());
+                return "Working on "+fs.getRemoteWorkingDir();
+                //System.out.println(fs.getRemoteWorkingDir());
             } else System.out.println("Erro de sintaxe: connect <ip> <porto>");
+            
+       
         }else{
+            tcpHandler.writeData(msg.getMsg());
+            return (String) tcpHandler.readData();
             
-            //processar outros comandos
-            //System.out.println("AQUI "+msg.getMsg());
             
-            return tcpHandler.sendRequest(msg.getMsg());
-           /* System.out.println("AQUI "+msg.getMsg());
-            System.out.println(
-                    tcpHandler.sendRequest("HOME "+msg.getName())
-                );*/
-            /*System.out.println("AQUI"+msg.getMsg());
-            return tcpHandler.sendRequest(msg.getMsg());*/
+           // return tcpHandler.sendRequest(msg.getMsg());
+           
         }
         return "";
     }
+    
     
 }

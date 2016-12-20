@@ -79,7 +79,8 @@ public class Client {
                         } else System.out.println("Erro de sintaxe: nome <nome>");
                     }
                     else if(cmd[0].equalsIgnoreCase(CONNECT)){
-                        System.out.println(commands.processRequest(new Msg(name, msg),clientFileSystem));
+                        //System.out.println(commands.processRequest(new Msg(name, msg),clientFileSystem));
+                        System.out.println(commands.processRequest(new Msg(name, "connect 127.0.0.1 7001"),clientFileSystem));
                     }
                     else{
                         
