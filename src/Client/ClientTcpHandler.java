@@ -1,11 +1,11 @@
 package Client;
 
-import java.io.BufferedReader;
+import common.FileObject;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
-import java.io.PrintWriter;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -16,20 +16,11 @@ public class ClientTcpHandler {
     protected int serverPort;
     protected Socket socketToServer;
     
-    public ClientTcpHandler(/*InetAddress servAddr, Integer servPort*/){
-        /*serverAddress = servAddr;
-        serverPort = servPort;
-        
-        try {
-            socketToServer = new Socket(servAddr, servPort);
-            socketToServer.setSoTimeout(TIMEOUT);
-            socketToServer.
-            
-        } catch(IOException e){
-            System.out.println("Ocorreu um erro no acesso ao socket" + ":\n\t"+e);
-        }*/
+    public ClientTcpHandler()
+    {
         socketToServer = null;
     }
+    
     public boolean connectToServer(InetAddress servAddr, Integer servPort){
         try {
             if(socketToServer != null){
@@ -44,41 +35,71 @@ public class ClientTcpHandler {
         }
     }
     
-    public String sendRequest(String request) throws IOException, ClassNotFoundException{
-        PrintWriter pout;
-        
+    public Object readData(){
+        Object obj = null;
         try {
-            if(socketToServer == null) return null;
-            pout = new PrintWriter(socketToServer.getOutputStream(), true);
-            pout.println(request);
-            //pout.flush();
+            ObjectInputStream in = new ObjectInputStream(socketToServer.getInputStream());
+            obj = in.readObject();
         } catch (IOException ex) {
-            System.out.println("Erro: Não foi possível enviar os dados ao servidor via TCP!");
+            System.out.println("Data access error:\n\t"+ex);
+        } catch (ClassNotFoundException ex) {
+            System.out.println("Data access error:\n\t"+ex);
         }
-        return getResponse();
+        return obj;
+    } 
+    
+    public void writeData(Object obj){
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(socketToServer.getOutputStream());
+            out.writeObject(obj);
+            out.flush();
+        } catch (IOException ex) {
+            System.out.println("Data access error:\n\t"+ex);
+        }
+       
     }
     
-    public String getResponse() throws IOException, ClassNotFoundException{
-        // Receber a resposta do servidor (TCP)
+    public String sendFile(String path){
+        byte[] chunk = new byte[1024];
+        int nbytes;
+        
+        //OutputStream os;
+        
+        FileObject fObj;
+
+        try {
+            //OutputStream out = socketToServer.getOutputStream();
+            ObjectOutputStream oout = new ObjectOutputStream(socketToServer.getOutputStream());
+            FileInputStream fis = new FileInputStream(path);
+            int count = 0;
+            nbytes = fis.read(chunk);
+            while(true){   
+                    if(nbytes == -1)
+                        break;
+                    fObj = new FileObject();
+                    fObj.setFileChunk(chunk);
+                    fObj.setnBytes(nbytes);
+                    System.out.println("Block: "+ ++count +" Writing: "+fObj.getnBytes()+ " bytes");
+                    oout.writeObject(fObj);
+                    //oout.reset();
+                    oout.flush();
+                    
+                    nbytes = fis.read(chunk);
+
+            }  
+            fObj = new FileObject();
+            fObj.setIsEOF(true);
+            oout.writeObject(fObj);
+            oout.flush();
+
+            fis.close();
             
-            //DEBUG - ver se o tcp está funcional
-            /* O servidor reve de devolver respostas baseadas nos comandos a ele enviados,
-            deve também ser possível receber ficheiros nbytes = in.read(fileChunk);
-            ver os exemplos do marinho
-            */
-            //String resposta;
-            /*BufferedReader in_ = new BufferedReader(
-                    new InputStreamReader(socketToServer.getInputStream())
-            );*/
-            ObjectInputStream in = new ObjectInputStream(socketToServer.getInputStream());
-            //System.out.println((String)in.readObject());
-            
-            //resposta = in_.readLine();  
-            //return in_.readLine();
-            //System.out.println("\n\t"+resposta);
-            
-            // fim Debug
-            return (String) in.readObject();
+            return "File sent";
+        } catch (FileNotFoundException ex) {
+            return "File not found";
+        } catch (IOException ex) {
+            return "IO exception";
+        }
     }
     
     public void closeSocket(){
