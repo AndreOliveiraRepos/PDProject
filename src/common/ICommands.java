@@ -11,11 +11,11 @@ package common;
  */
 
 public interface ICommands {
-    private static final String NAME = "NAME";
-    private static final String LIST = "LIST";
-    private static final String MSG = "MSG";
-    private static final String USERS = "USERS";
-    private static final String MSGTO = "MSGTO";
+    public static final String NAME = "NAME";
+    public static final String LIST = "LIST";
+    public static final String MSG = "MSG";
+    public static final String USERS = "USERS";
+    public static final String MSGTO = "MSGTO";
     //commands
     public static final String CONNECT = "CONNECT";
     public static final String COPY = "CP";
