@@ -97,6 +97,13 @@ public class ClientCommands /*extends UnicastRemoteObject implements ServerMonit
         return "-";
     }
     
+    public String processCommand(String msg){
+        String[] cmd = msg.split("\\s");
+        
+        return "";
+    }
+    
+    
     public String getLastCommand(){
         return lastCommand;
     }

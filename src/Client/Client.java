@@ -32,7 +32,8 @@ public class Client {
                 System.out.print("> ");
                 msg = in.readLine();
                 if(msg.equalsIgnoreCase(EXIT)) break;
-                System.out.println(commands.processRequest(msg));
+                System.out.println(commands.processCommand(msg));
+                //System.out.println(commands.processRequest(msg));
             }
         } catch (IOException ex) {
             System.out.println("Erro ao ler comando! " + ex);
