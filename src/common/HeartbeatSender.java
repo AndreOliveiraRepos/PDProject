@@ -7,6 +7,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HeartbeatSender<T> extends Thread{
     private T heartbeat;
@@ -23,11 +25,18 @@ public class HeartbeatSender<T> extends Thread{
     private ObjectOutputStream out;
     
     public HeartbeatSender(T hb, InetAddress serverAddr, int serverPort){
-        this.serverAddr = serverAddr;
-        this.serverPort = serverPort;
-        this.heartbeat = hb;
         
-        running = true;
+            this.serverAddr = serverAddr;
+            this.serverPort = serverPort;
+            this.heartbeat = hb;
+            
+            running = true;
+        try {    
+            socket = new DatagramSocket(0);
+            socket.setSoTimeout(TIMEOUT_MS);
+        } catch (SocketException ex) {
+            Logger.getLogger(HeartbeatSender.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public HeartbeatSender(InetAddress serverAddr, int serverPort){
@@ -35,6 +44,13 @@ public class HeartbeatSender<T> extends Thread{
         this.serverPort = serverPort;
         
         running = true;
+        
+        try {    
+            socket = new DatagramSocket(0);
+            socket.setSoTimeout(TIMEOUT_MS);
+        } catch (SocketException ex) {
+            Logger.getLogger(HeartbeatSender.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void terminate(){
@@ -45,12 +61,14 @@ public class HeartbeatSender<T> extends Thread{
         heartbeat = hb;
     }
     
+    public InetAddress getLocalAddr(){
+        return socket.getLocalAddress();
+    }
+    
     @Override
     public void run(){
         
         try{
-            socket = new DatagramSocket();
-            socket.setSoTimeout(TIMEOUT_MS);
             
             while(running){
                 bOut = new ByteArrayOutputStream();          

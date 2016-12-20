@@ -1,64 +1,183 @@
 package FileServer;
 
-import common.Heartbeat;
+import common.FileObject;
+import common.FileSystem;
 import common.HeartbeatSender;
-import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 class AtendeCliente extends Thread {
     
     public static final int MAX_SIZE = 4000;
     
+    public static final String COPY = "CP";
+    public static final String REGISTER = "REGISTER";
+    public static final String LOGIN = "LOGIN";
+    public static final String LOGOUT = "LOGOUT";
+    public static final String MOVE = "MV";
+    public static final String CHANGEDIR = "CD";
+    public static final String BACKDIR = "CD..";
+    public static final String GETCONTENTDIR = "LS";
+    public static final String GETFILECONTENT = "CAT";
+    public static final String MKDIR = "MKDIR";
+    public static final String RMFILE = "RM";
+    
+    public static boolean listenning;
+    
     Socket socketToClient;
     int myId;
+    String serverName;
+    FileSystem serverFileSystem;
 
-    public AtendeCliente(Socket s, int id){
+    public AtendeCliente(Socket s, int id, String name, FileSystem fs){
         socketToClient = s;
         myId = id;
+        serverName = name;
+        serverFileSystem = fs;
+        listenning = true;
     }
     
     @Override
     public void run(){
-        BufferedReader in;
-        OutputStream out;
+        String resposta = "";
+        String convertedPath = "";
         
-        /*byte[]fileChunk = new byte[MAX_SIZE];
-        int nbytes;*/
-        
-        String clientRequest = null;
-        String resposta = null;
-        
-        try{
-            // Streams de entrada e saída via TCP
-            in = new BufferedReader(
-                new InputStreamReader(
-                    socketToClient.getInputStream()
-                )
-            );
-            out = socketToClient.getOutputStream();
-            
-            clientRequest = in.readLine();
-            System.out.println("Pedido recebido: "+clientRequest);
-            
-            // Enviar resposta ao cliente
-            resposta = "O servidor recebeu o pedido: " + clientRequest;
-            out.write(resposta.getBytes(),0,resposta.length());
-            out.flush();
-            
-        }catch(IOException e){
-            System.out.println("Ocorreu a excepcao de E/S: \n\t" + e);                       
+        while(listenning){
+            String clientRequest = (String)this.readData();
+            System.out.println("LEU:" + clientRequest);
+            String[] cmd = clientRequest.split("\\s");
+            switch(cmd[0].toUpperCase()){
+                case "HOME":
+                    resposta = "remote"+serverName+"/temp";
+                    this.writeData(resposta);
+                    System.out.println("SENT:" + resposta);
+                    break;
+                case COPY:
+                    convertedPath = cmd[2].replace("remote"+serverName+"/","C:/");
+                    System.out.println("PEDIDO: "+clientRequest);
+
+                    System.out.println(receiveFile(convertedPath));
+                    break;
+            }
         }
-        
         try{
              socketToClient.close();
         } catch (IOException ex) {}
+    }
+    
+    public void writeData(Object obj){
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(socketToClient.getOutputStream());
+            out.writeObject(obj);
+            out.flush();
+        } catch (IOException ex) {
+            System.out.println("Data access error:\n\t"+ex);
+        }
+    }
+    
+    public Object readData(){
+        Object obj = null;
+        try {
+            ObjectInputStream in = new ObjectInputStream(socketToClient.getInputStream());
+            obj = in.readObject();
+        } catch (IOException ex) {
+            System.out.println("Data access error:\n\t"+ex);
+        } catch (ClassNotFoundException ex) {
+            System.out.println("Data access error:\n\t"+ex);
+        }
+        return obj;
+    } 
+    
+    public String receiveFile(String path){
+        
+        FileObject fObj;
+        System.out.println("Writing on " + path);
+        try {
+
+            ObjectInputStream ois = new ObjectInputStream(socketToClient.getInputStream());
+            FileOutputStream fos = new FileOutputStream(Paths.get(path).toString());
+            int contador =0;
+            int nbytes;
+            //nbytes = fin.read(fileChunk);
+            while(true){                    
+                
+                fObj = (FileObject)ois.readObject();
+                System.out.println("Recebido o bloco n. " + ++contador + " com " + fObj.getnBytes() + " bytes.");
+                if(fObj.isIsEOF())
+                    break;
+                
+                
+                fos.write(fObj.getFileChunk(), 0, fObj.getnBytes());
+                System.out.println("Acrescentados " + fObj.getnBytes() + " bytes ao ficheiro " + path+ ".");
+
+            }  
+            //
+            fos.flush();
+            fos.close();
+            //in.close();
+            //fos.close();
+            return "Done!";
+        
+        } catch (FileNotFoundException ex) {
+            return "File not Found!";
+        } catch (IOException ex) {
+            return "Erros writing!";
+        } catch (ClassNotFoundException ex) {
+            return "Class not Found!";
+        } 
+    }
+    
+    public String sendFile(String path){
+        byte[] fileChunk = new byte[2048];
+        int nbytes;
+        File fileToSend = new File(path);
+        FileInputStream fin = null;
+        
+        
+        if(fileToSend.exists()){
+            try {
+                OutputStream out = socketToClient.getOutputStream();
+                fin = new FileInputStream(fileToSend.getAbsolutePath());
+                while((nbytes = fin.read(fileChunk))>0){                        
+                        
+                        out.write(fileChunk, 0, nbytes);
+                        out.flush();
+                                                
+                }   
+                fin.close();
+                return "File sent";
+            } catch (FileNotFoundException ex) {
+                return "File not found";
+            } catch (IOException ex) {
+                return "IO exception";
+            }
+        }
+        else{
+            return "File not found!";
+        }
+    }
+
+    public void sendResponse(String resposta){
+        try {
+            ObjectOutputStream oout = new ObjectOutputStream(socketToClient.getOutputStream());
+            oout.writeObject(resposta);
+            oout.flush();
+            System.out.println("Resposta enviada: " + resposta);
+        } catch (IOException ex) {
+            System.out.println("Nao foi possivel enviar resposta ao cliente! " + ex);
+        }
     }
 }
 
@@ -75,6 +194,8 @@ public class FileServer {
     private static ServerSocket serverSocket;  //TCP Server
     
     private static ArrayList<String> connectedClients;
+    private static FileSystem serverFileSystem;
+    
     //directory
     
     public FileServer(String n, InetAddress dirAddr, int dirPort) {
@@ -85,6 +206,7 @@ public class FileServer {
         name = n;
         connectedClients = new ArrayList<String>();
         online = true;
+        serverFileSystem = new FileSystem(name);
         
         try {
             //Gera porto automático TCP
@@ -109,17 +231,20 @@ public class FileServer {
                     Integer.parseInt(args[2])
             );
             
+            connectedClients.add("auth");
+            
             //Inicializar heartbeat/Packets UDP
-            hbSender = new HeartbeatSender<ServerHeartbeat>(
-                new ServerHeartbeat(serverSocket.getInetAddress(), serverSocket.getLocalPort(),name,connectedClients),
-                directoryServerAddr, directoryServerPort);
+            hbSender = new HeartbeatSender<ServerHeartbeat>(directoryServerAddr, directoryServerPort);
             hbSender.setDaemon(true);
             hbSender.start();
             
+            hbSender.setHeartbeat(
+                new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients)
+            );
             fserver.processRequests();
             //Esperar que a thread termine
             hbSender.join();
-            
+              
         } catch (UnknownHostException ex) {
             System.out.println("Destino desconhecido:\n\t"+ex);
         } catch (InterruptedException ex) {
@@ -139,18 +264,17 @@ public class FileServer {
         
         System.out.println(name +" Online!");
         
-        while(online){
-            try {
+        try {
+            while(online){
                 socketToClient = serverSocket.accept();
-                (new AtendeCliente(socketToClient,threadId++)).start();
-            } catch (IOException ex) {
-            } finally{
-                try {
-                    serverSocket.close();
-                } catch (IOException e) {}
+                (new AtendeCliente(socketToClient, threadId++, name, serverFileSystem)).start();
             }
-        }  
+        } catch (IOException ex) {
+            System.out.println("Ocorreu um erro ao criar o socket TCP! " + ex);
+        } finally{
+            try {
+                serverSocket.close();
+            } catch (IOException e) {}
+        }
     }
-    
-    //arraylist para guardar clientes ligados?
 }

@@ -2,7 +2,8 @@ package common;
 
 import java.io.Serializable;
 
-public class Heartbeat implements Serializable{
+public class Heartbeat implements Serializable
+{
     private final int port;
     private String name;
     

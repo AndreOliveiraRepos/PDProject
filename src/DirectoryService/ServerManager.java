@@ -4,9 +4,11 @@
 package DirectoryService;
 
 import FileServer.ServerHeartbeat;
+import java.net.InetAddress;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class ServerManager extends Thread
@@ -22,8 +24,8 @@ public class ServerManager extends Thread
         running = true;
     }
     
-    public void processHeartbeat(ServerHeartbeat hb){
-        ServerEntry se = new ServerEntry(hb);
+    public void processHeartbeat(ServerHeartbeat hb, InetAddress hbAddr) throws RemoteException{
+        ServerEntry se = new ServerEntry(hb, hbAddr);
         onlineServers.put(se.getName(),se);
     }
     
@@ -59,31 +61,24 @@ public class ServerManager extends Thread
         running = false;
     }
     
-    public List<ServerEntry> getOnlineServers(){
-        return (List<ServerEntry>) onlineServers.values();
+    public ArrayList<ServerEntry> getServerList(){
+        //return onlineServers.values();
+        ArrayList<ServerEntry> arr = new ArrayList<ServerEntry>();
+        Iterator it = onlineServers.values().iterator();
+        while(it.hasNext()) arr.add((ServerEntry)it.next());
+        return arr;
     }
     
-    public Map<String,Integer> getServerMap(){
-//        StringBuilder buffer = new StringBuilder();
-//        Iterator it = onlineServers.entrySet().iterator();
-//        while (it.hasNext()) {
-//            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();  
-//
-//            System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
-//            buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
-//        }
-//        return buffer.toString();*/
-        Map<String,Integer> serversInfo = new HashMap<String,Integer>();
-
-        Iterator it = onlineServers.entrySet().iterator();
+    public String getServerListAsString(){
+        StringBuilder buff = new StringBuilder();
+        Iterator it = onlineServers.values().iterator();
+        buff.append("\n");
         while (it.hasNext()) {
-            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();
-
-            //System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
-            //buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
-            serversInfo.put(entry.getKey(), entry.getValue().getPort());
+            ServerEntry se = (ServerEntry)it.next();
+            //buff.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+            buff.append(se.getName() + "\t" + se.getAddr() + "\t" + se.getPort() + "\n");
         }
-        return serversInfo;
+        return buff.toString();
     }
     
     @Override
@@ -92,12 +87,39 @@ public class ServerManager extends Thread
     }
     
     public boolean isAuthenticatedClient(String c){
-        Iterator it = onlineServers.values().iterator();
+        /*Iterator it = onlineServers.values().iterator();
         while (it.hasNext()) {
             if(((ServerEntry)it.next()).existsClient(c)){
                 return true;
             }
         }
+        return false;*/
+        for (ServerEntry se : onlineServers.values()){
+            if (se.existsClient(c)) return true;
+        }
         return false;
     }
+    
+//    public Map<String,Integer> getServerMap(){
+////        StringBuilder buffer = new StringBuilder();
+////        Iterator it = onlineServers.entrySet().iterator();
+////        while (it.hasNext()) {
+////            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();  
+////
+////            System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
+////            buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+////        }
+////        return buffer.toString();*/
+//        Map<String,Integer> serversInfo = new HashMap<String,Integer>();
+//
+//        Iterator it = onlineServers.entrySet().iterator();
+//        while (it.hasNext()) {
+//            Map.Entry<String,ServerEntry> entry = (Map.Entry)it.next();
+//
+//            //System.out.print("" + entry.getKey() /*+ " = " + entry.getValue()*/);
+//            //buffer.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
+//            serversInfo.put(entry.getKey(), entry.getValue().getPort());
+//        }
+//        return serversInfo;
+//    }
 }

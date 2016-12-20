@@ -5,12 +5,7 @@
  */
 package DirectoryService;
 
-import common.Heartbeat;
-import java.net.InetAddress;
-
-public class ClientEntry extends common.Entry{
-        
-    public ClientEntry(Heartbeat hb, InetAddress hbAddr) {
-        super(hb, hbAddr);
-    }
+public interface ServerMonitorListener extends java.rmi.Remote{
+    
+    public void printServers() throws java.rmi.RemoteException;
 }
