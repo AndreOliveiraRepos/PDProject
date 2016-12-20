@@ -46,4 +46,6 @@ public class Client {
     public void printContent(String s){
         System.out.println(s);
     }
+    
+  
 }
