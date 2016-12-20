@@ -28,6 +28,10 @@ public class ClientManager extends Thread {
         onlineClients.put(ce.getName(),ce);
     }
     
+    public ClientEntry getClient(String c){
+        return onlineClients.get(c);
+    }
+    
     @Override
     public void run(){
         while(running){

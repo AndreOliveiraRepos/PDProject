@@ -1,5 +1,6 @@
 package ServerMonitor;
 
+import DirectoryService.ServerMonitorListener;
 import DirectoryService.RemoteServiceInterface;
 import DirectoryService.ServerEntry;
 import java.rmi.Naming;
@@ -10,7 +11,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class ServerMonitorClient extends UnicastRemoteObject
+public class ServerMonitorClient extends UnicastRemoteObject implements ServerMonitorListener
 {
     private String addr;
     private int port;
@@ -28,27 +29,20 @@ public class ServerMonitorClient extends UnicastRemoteObject
             String registration = "rmi://" + addr + "/" + RemoteServiceInterface.SERVICE_NAME;
             Remote remoteService = Naming.lookup(registration);
             serverMonitor = (RemoteServiceInterface) remoteService;
-            printServers();
+            serverMonitor.addObserver(this);
         }
-        catch (NotBoundException e)
-        {
+        catch (NotBoundException e){
             System.out.println("Não existe servico disponivel! ");
         }
-        catch (RemoteException e)
-        {
+        catch (RemoteException e){
             System.out.println("Erro no RMI: " + e);
         }
-        catch (Exception e)
-        {
+        catch (Exception e){
             System.out.println("Erro: " + e);
         }
     }
     
-    public void registerListener(){
-        //serverMonitor.addServerMonitorListener(this);
-    }
-    
-    //@Override
+    @Override
     public void printServers() throws RemoteException{
         StringBuilder out = new StringBuilder();
         ArrayList<ServerEntry> serverList = serverMonitor.getServerList();
@@ -62,7 +56,6 @@ public class ServerMonitorClient extends UnicastRemoteObject
             }
         }
         view.updateView(out.toString());
-        
     }
     
 }

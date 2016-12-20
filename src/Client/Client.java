@@ -1,5 +1,7 @@
 package Client;
 
+import DirectoryService.ServerEntry;
+import DirectoryService.ServerMonitorListener;
 import common.Msg;
 import common.Heartbeat;
 import common.HeartbeatSender;
@@ -8,8 +10,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.rmi.RemoteException;
 
-public class Client {
+public class Client /*extends UnicastRemoteObject implements ServerMonitorListener*/{
     private static final String EXIT = "EXIT";
     private static final String NAME = "NAME";
    
@@ -19,10 +22,14 @@ public class Client {
     private static ClientUdpHandler udpHandler;
     private static ClientUdpListener udpListener;
     private static HeartbeatSender<Heartbeat> hbSender;
+    private static ClientCommands commands;
+    
+    public Client() throws RemoteException{}
         
-    public static void main(String[] args) {
+    public static void main(String[] args) throws RemoteException {
         
         Client observer = new Client();
+        
         
         if(args.length != 2){
             System.out.println("Sintaxe: java Client dirAdress dirUdpPort");
@@ -38,6 +45,7 @@ public class Client {
             Integer directoryServerPort = Integer.parseInt(args[1]);
             udpHandler = new ClientUdpHandler(directoryServerAddr, directoryServerPort);
             udpListener = new ClientUdpListener(observer);
+            udpListener.start();
             tcpHandler = new ClientTcpHandler();
             
             // Enviar heartbeats UDP ao serviço de directoria
@@ -62,7 +70,10 @@ public class Client {
             */
             
             String msg;
-            ClientCommands commands = new ClientCommands(udpHandler,tcpHandler);
+            commands = new ClientCommands(observer, udpHandler,tcpHandler, 
+                    directoryServerAddr, directoryServerPort);
+            //Adicionar este listener
+            //commands.getRmiService().addObserver(observer);
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true){
                 System.out.print("> ");
@@ -100,4 +111,25 @@ public class Client {
     public void printContent(String s){
         System.out.println(s);
     }
+    
+    public String getName(){
+        return name;
+    }
+
+    /*@Override
+    public void printServers() throws RemoteException {
+        if (commands.getLastCommand().equalsIgnoreCase("LIST")){
+            StringBuilder out = new StringBuilder();
+            out.append("Nao esta autenticado nos servidores: ");
+            
+            ArrayList<ServerEntry> serverList = commands.getRmiService().getServerList();
+            Iterator sit = serverList.iterator();
+            while (sit.hasNext()){
+                ServerEntry se = (ServerEntry)sit.next();
+                if (!se.existsClient(name))
+                out.append("\n" + se.getName() + "\t" + se.getAddr().getHostAddress() + "\t" + se.getPort());
+            }
+            System.out.println(out.toString());
+        }
+    }*/
 }

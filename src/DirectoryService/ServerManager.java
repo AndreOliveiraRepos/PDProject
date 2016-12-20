@@ -5,6 +5,7 @@ package DirectoryService;
 
 import FileServer.ServerHeartbeat;
 import java.net.InetAddress;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +24,7 @@ public class ServerManager extends Thread
         running = true;
     }
     
-    public void processHeartbeat(ServerHeartbeat hb, InetAddress hbAddr){
+    public void processHeartbeat(ServerHeartbeat hb, InetAddress hbAddr) throws RemoteException{
         ServerEntry se = new ServerEntry(hb, hbAddr);
         onlineServers.put(se.getName(),se);
     }
@@ -86,11 +87,15 @@ public class ServerManager extends Thread
     }
     
     public boolean isAuthenticatedClient(String c){
-        Iterator it = onlineServers.values().iterator();
+        /*Iterator it = onlineServers.values().iterator();
         while (it.hasNext()) {
             if(((ServerEntry)it.next()).existsClient(c)){
                 return true;
             }
+        }
+        return false;*/
+        for (ServerEntry se : onlineServers.values()){
+            if (se.existsClient(c)) return true;
         }
         return false;
     }

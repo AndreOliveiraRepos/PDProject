@@ -11,6 +11,7 @@ public class DirectoryServer {
     
     private static ServerManager serverManager;
     private static ClientManager clientManager;
+    private static RMIService rmiService;
         
     public static void main(String[] args) 
     {   
@@ -26,7 +27,7 @@ public class DirectoryServer {
         clientManager.start();
         
         try {
-            RMIService rmiService = new RMIService(serverManager);
+            rmiService = new RMIService(serverManager);
             rmiService.run();
         } catch (RemoteException ex) {
             System.out.println("Erro ao iniciar o servico RMI! " + ex);
@@ -38,6 +39,7 @@ public class DirectoryServer {
         private static final String LIST = "LIST";
         private static final String USERS = "USERS";
         private static final String MSG = "MSG";
+        private static final String MSGTO = "MSGTO";
         
         ServerUdpListener udpListener;
         ChatService chatService;
@@ -72,6 +74,7 @@ public class DirectoryServer {
             if (obj instanceof ServerHeartbeat){
                 ServerHeartbeat hb = (ServerHeartbeat)obj;
                 serverManager.processHeartbeat(hb, udpListener.getCurrentAddr());
+                rmiService.notifyObservers();
             }
             else if (obj instanceof Heartbeat){
                 Heartbeat hb = (Heartbeat)obj;
@@ -105,16 +108,38 @@ public class DirectoryServer {
 
                 if (args[0].equalsIgnoreCase(MSG))
                 {
-                    Iterator it = clientManager.getOnlineClients().values().iterator();
-                    while (it.hasNext()){
-                        ClientEntry client = (ClientEntry) it.next();
-                        if (serverManager.isAuthenticatedClient(client.getName())){
-                            chatService.sendMessage(
-                                client.getName() + ": " + args[1],
-                                client.getAddr(), client.getPort());
+                    if (args.length >= 2){
+                        Iterator it = clientManager.getOnlineClients().values().iterator();
+                        while (it.hasNext()){
+                            ClientEntry client = (ClientEntry) it.next();
+                            String message = msg.getMsg().substring(3); //tira "msg"
+                            //System.out.println("client: "+ client.getName() + " ");
+                            if (serverManager.isAuthenticatedClient(client.getName())){
+                                //System.out.println("is authenticated!");
+                                chatService.sendMessage(
+                                    msg.getName() + ": " + message,
+                                    client.getAddr(), client.getPort());
+                            } //else System.out.println("is NOT authenticated!");
                         }
+                        udpListener.sendResponse("Mensagem de difusao enviada...");
                     }
-                    udpListener.sendResponse("\n");
+                    
+                } else if (args[0].equalsIgnoreCase(MSGTO))
+                {
+                    if (args.length >= 3){
+                        
+                        ClientEntry client = (ClientEntry) clientManager.getClient(args[1]);
+                        String message = msg.getMsg().substring(3); //tira "msg"
+                        System.out.println("client: "+ client.getName() + " ");
+                        if (serverManager.isAuthenticatedClient(client.getName())){
+                            System.out.println("is authenticated!");
+                            chatService.sendMessage(
+                                msg.getName() + ": " + message,
+                                client.getAddr(), client.getPort());
+                            udpListener.sendResponse("Mensagem enviada...");
+                        } else System.out.println("is NOT authenticated!");
+                    } else udpListener.sendResponse("Erro de sintaxe: MSGTO <nome> <message>");
+                    
                 } else udpListener.sendResponse("Unknown Command");
             }
         }

@@ -120,8 +120,8 @@ public class FileServer {
                     Integer.parseInt(args[2])
             );
             
-            connectedClients.add("Carlos");
-            connectedClients.add("va ok, ola");
+            connectedClients.add("lm1");
+            connectedClients.add("lm2");
             
             //Inicializar heartbeat/Packets UDP
             hbSender = new HeartbeatSender<ServerHeartbeat>(directoryServerAddr, directoryServerPort);
@@ -156,19 +156,17 @@ public class FileServer {
         
         System.out.println(name +" Online!");
         
-            try {
-                while(online){
-                    socketToClient = serverSocket.accept();
-                    (new AtendeCliente(socketToClient,threadId++)).start();
-                }
-            } catch (IOException ex) {
-            } finally{
-                try {
-                    serverSocket.close();
-                } catch (IOException e) {}
+        try {
+            while(online){
+                socketToClient = serverSocket.accept();
+                (new AtendeCliente(socketToClient,threadId++)).start();
             }
-          
+        } catch (IOException ex) {
+            System.out.println("Ocorreu um erro ao criar o socket TCP! " + ex);
+        } finally{
+            try {
+                serverSocket.close();
+            } catch (IOException e) {}
+        }
     }
-    
-    //arraylist para guardar clientes ligados?
 }

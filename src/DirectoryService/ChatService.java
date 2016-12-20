@@ -27,6 +27,7 @@ public class ChatService
     {
         try {
             socket = new DatagramSocket();
+            socket.setSoTimeout(1500);
         } catch (SocketException ex) {
             System.out.println("Chat Service - Erro a nivel do socket!" + ex);
         }
@@ -38,8 +39,10 @@ public class ChatService
         ObjectOutputStream oOut;
         
         try {
-            if (socket == null) return ;
-            
+            if (socket == null) {
+                System.out.println("Socket Error");
+                return;
+            }
             
             baos = new ByteArrayOutputStream();
             oOut = new ObjectOutputStream(baos);
