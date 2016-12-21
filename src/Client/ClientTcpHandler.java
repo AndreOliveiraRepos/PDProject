@@ -1,6 +1,7 @@
 package Client;
 
 import common.FileObject;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -80,7 +81,7 @@ public class ClientTcpHandler {
                     fObj = new FileObject();
                     fObj.setFileChunk(chunk);
                     fObj.setnBytes(nbytes);
-                    System.out.println("Block: "+ ++count +" Writing: "+fObj.getnBytes()+ " bytes");
+                    //System.out.println("Block: "+ ++count +" Writing: "+fObj.getnBytes()+ " bytes");
                     oout.writeObject(fObj);
                     oout.flush();
                     nbytes = fis.read(chunk);
@@ -93,7 +94,7 @@ public class ClientTcpHandler {
 
             fis.close();
             
-            return "File sent";
+            return "File sent to server";
         } catch (FileNotFoundException ex) {
             return "File not found";
         } catch (IOException ex) {
@@ -101,43 +102,49 @@ public class ClientTcpHandler {
         }
     }
     
-       public String receiveFile(String path){
-        
+    public String receiveFile(String path){
+        File fileToWrite = new File(path);
+        System.out.println("CAMINHO:" + path);
         FileObject fObj;
-        System.out.println("Writing on " + path);
-        try {
+        if(fileToWrite.exists()){
+            return "File already exists";
+        }else{
+            System.out.println("Writing on " + path);
+            try {
 
-            ObjectInputStream ois = new ObjectInputStream(socketToServer.getInputStream());
-            FileOutputStream fos = new FileOutputStream(Paths.get(path).toString());
-            int contador =0;
-            int nbytes;
-            //nbytes = fin.read(fileChunk);
-            while(true){                    
-                
-                fObj = (FileObject)ois.readObject();
-                System.out.println("Recebido o bloco n. " + ++contador + " com " + fObj.getnBytes() + " bytes.");
-                if(fObj.isIsEOF())
-                    break;
-                
-                
-                fos.write(fObj.getFileChunk(), 0, fObj.getnBytes());
-                System.out.println("Acrescentados " + fObj.getnBytes() + " bytes ao ficheiro " + path+ ".");
+                ObjectInputStream ois = new ObjectInputStream(socketToServer.getInputStream());
+                FileOutputStream fos = new FileOutputStream(fileToWrite);
+                int contador =0;
+                int nbytes;
+                //nbytes = fin.read(fileChunk);
+                while(true){                    
 
-            }  
-            //
-            fos.flush();
-            fos.close();
-            //in.close();
-            //fos.close();
-            return "Done!";
+                    fObj = (FileObject)ois.readObject();
+                    //System.out.println("Recebido o bloco n. " + ++contador + " com " + fObj.getnBytes() + " bytes.");
+                    if(fObj.isIsEOF())
+                        break;
+
+
+                    fos.write(fObj.getFileChunk(), 0, fObj.getnBytes());
+                    //System.out.println("Acrescentados " + fObj.getnBytes() + " bytes ao ficheiro " + path+ ".");
+
+                }  
+                //
+                fos.flush();
+                fos.close();
+                //in.close();
+                //fos.close();
+                return "Received from server!";
+
+            } catch (FileNotFoundException ex) {
+                return "File not Found!";
+            } catch (IOException ex) {
+                return "Erros writing!";
+            } catch (ClassNotFoundException ex) {
+                return "Class not Found!";
+            } 
+        }
         
-        } catch (FileNotFoundException ex) {
-            return "File not Found!";
-        } catch (IOException ex) {
-            return "Erros writing!";
-        } catch (ClassNotFoundException ex) {
-            return "Class not Found!";
-        } 
     }
     public void closeSocket(){
         if(socketToServer != null){

@@ -7,6 +7,7 @@ package FileServer;
 
 import common.FileSystem;
 import common.ICommands;
+import java.io.File;
 import java.net.Socket;
 
 /**
@@ -47,12 +48,16 @@ public class ServerCommands implements ICommands {
 
     @Override
     public String Download(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        output = tcpHandler.receiveFile(path+"\n");
+        output += "[Server]"+(String)tcpHandler.readData();
+        return output;
     }
 
     @Override
     public String Upload(String path) {
-        return "";
+        output = tcpHandler.sendFile(path);
+        return output;
     }
 
     @Override
@@ -87,34 +92,63 @@ public class ServerCommands implements ICommands {
     public String Process(String line) {
         
         String[] cmd = line.split("\\s");
-        System.out.println("CONTA:"+cmd.length);
+        
         if(cmd.length < 1){
             String rep;
             if(cmd[1].contains("remote"+serverFileSystem.getName())){
                 rep = cmd[1].replace("remote"+serverFileSystem.getName()+"/","C:/");
                 cmd[1] = rep;
-                System.out.println("CMD1 primeiro"+cmd[1]);
+               
             }
-        }else if(cmd.length> 2){
+        }else if(cmd.length < 4 && cmd.length > 2){
             String rep;
             if(cmd[1].contains("remote"+serverFileSystem.getName())){
                 rep = cmd[1].replace("remote"+serverFileSystem.getName()+"/","C:/");
                 cmd[1] = rep;
-                System.out.println("CMD1 segundo if"+cmd[1]);
+                
                 if(cmd[2].contains("remote"+serverFileSystem.getName())){
                     
                     rep=cmd[2].replace("remote"+serverFileSystem.getName()+"/","C:/");
                     cmd[2] = rep;
-                    System.out.println("CMD2"+cmd[2]);
+                    
                 }
             }
             
+        }else if(cmd.length == 4){
+            
+            String rep;
+            if(cmd[1].contains("remote"+serverFileSystem.getName())){
+                rep = cmd[1].replace("remote"+serverFileSystem.getName()+"/","C:/");
+                cmd[1] = rep;
+                
+            }
+            if(cmd[2].contains("remote"+serverFileSystem.getName())){
+                    
+                    rep=cmd[2].replace("remote"+serverFileSystem.getName()+"/","C:/");
+                    cmd[2] = rep;
+                    System.out.println("CMD2"+cmd[2]);
+            }
         }
         switch(cmd[0].toUpperCase()){
             case CONNECT:
                 return this.Connect(cmd);
             case COPY:
-                return this.Copy(cmd[1],cmd[2]);
+                if(cmd.length == 3){
+                    
+                    return this.Copy(cmd[1],cmd[2]);
+                }else if(cmd.length == 4){
+                    if(cmd[3].equalsIgnoreCase("DOWNLOAD")){
+                        //File f = new File(cmd[2]);
+                        System.out.println("CAMINHO: "+cmd[1]);
+                        return this.Upload(cmd[1]);
+                    }
+                    else if(cmd[3].equalsIgnoreCase("UPLOAD")){
+                        File f = new File(cmd[1]);
+                        System.out.println("CAMINHO: "+cmd[2]+f.getName());
+                        return this.Download(cmd[2]+"/"+f.getName());
+                    }
+                }
+                
             case REGISTER:
                 return "Unknown command type help";
             case LOGIN:
