@@ -26,45 +26,27 @@ import java.util.logging.Logger;
 class AtendeCliente extends Thread {
     
     public static final int MAX_SIZE = 4000;
-    public static final String COPY = "CP";
-    public static final String REGISTER = "REGISTER";
-    public static final String LOGIN = "LOGIN";
-    public static final String LOGOUT = "LOGOUT";
-    public static final String MOVE = "MV";
-    public static final String CHANGEDIR = "CD";
-    public static final String BACKDIR = "CD..";
-    public static final String GETCONTENTDIR = "LS";
-    public static final String GETFILECONTENT = "CAT";
-    public static final String MKDIR = "MKDIR";
-    public static final String RMFILE = "RM";
     
-    /*public static final String COPY = "CP";
-    public static final String REGISTER = "REGISTER";
-    public static final String LOGIN = "LOGIN";
-    public static final String LOGOUT = "LOGOUT";
-    public static final String MOVE = "MV";
-    public static final String CHANGEDIR = "CD";
-    public static final String BACKDIR = "CD..";
-    public static final String GETCONTENTDIR = "LS";
-    public static final String GETFILECONTENT = "CAT";
-    public static final String MKDIR = "MKDIR";
-    public static final String RMFILE = "RM";*/
+    
+   
     
     public static boolean listenning;
     
-    Socket socketToClient;
+    //Socket socketToClient;
     int myId;
     String serverName;
     FileSystem serverFileSystem;
     ServerCommands serverCommands;
+    ServerTCPHandler tcpHandler;
 
     public AtendeCliente(Socket s, int id, String name, FileSystem fs){
-        socketToClient = s;
+        tcpHandler = new ServerTCPHandler();
+        tcpHandler.setSocket(s);
         myId = id;
         serverName = name;
         serverFileSystem = fs;
         listenning = true;
-        serverCommands = new ServerCommands(serverFileSystem,socketToClient);
+        serverCommands = new ServerCommands(serverFileSystem,tcpHandler);
     }
     
     @Override
@@ -73,118 +55,15 @@ class AtendeCliente extends Thread {
         String convertedPath = "";
         
         while(listenning){
-            String clientRequest = (String)this.readData();
+            String clientRequest = (String)this.tcpHandler.readData();
             System.out.println("LEU:" + clientRequest);
-            this.sendResponse(serverCommands.Process(clientRequest));
+            this.tcpHandler.writeData(serverCommands.Process(clientRequest));
             
         }
-        try{
-             socketToClient.close();
-        } catch (IOException ex) {}
+        tcpHandler.closeSocket();
     }
     
-    public void writeData(Object obj){
-        try {
-            ObjectOutputStream out = new ObjectOutputStream(socketToClient.getOutputStream());
-            out.writeObject(obj);
-            out.flush();
-        } catch (IOException ex) {
-            System.out.println("Data access error:\n\t"+ex);
-        }
-    }
     
-    public Object readData(){
-        Object obj = null;
-        try {
-            ObjectInputStream in = new ObjectInputStream(socketToClient.getInputStream());
-            obj = in.readObject();
-        } catch (IOException ex) {
-            System.out.println("Data access error:\n\t"+ex);
-        } catch (ClassNotFoundException ex) {
-            System.out.println("Data access error:\n\t"+ex);
-        }
-        return obj;
-    } 
-    
-    public String receiveFile(String path){
-        
-        FileObject fObj;
-        System.out.println("Writing on " + path);
-        try {
-
-            ObjectInputStream ois = new ObjectInputStream(socketToClient.getInputStream());
-            FileOutputStream fos = new FileOutputStream(Paths.get(path).toString());
-            int contador =0;
-            int nbytes;
-            //nbytes = fin.read(fileChunk);
-            while(true){                    
-                
-                fObj = (FileObject)ois.readObject();
-                System.out.println("Recebido o bloco n. " + ++contador + " com " + fObj.getnBytes() + " bytes.");
-                if(fObj.isIsEOF())
-                    break;
-                
-                
-                fos.write(fObj.getFileChunk(), 0, fObj.getnBytes());
-                System.out.println("Acrescentados " + fObj.getnBytes() + " bytes ao ficheiro " + path+ ".");
-
-            }  
-            //
-            fos.flush();
-            fos.close();
-            //in.close();
-            //fos.close();
-            return "Done!";
-        
-        } catch (FileNotFoundException ex) {
-            return "File not Found!";
-        } catch (IOException ex) {
-            return "Erros writing!";
-        } catch (ClassNotFoundException ex) {
-            return "Class not Found!";
-        } 
-    }
-    
-    public String sendFile(String path){
-        byte[] fileChunk = new byte[2048];
-        int nbytes;
-        File fileToSend = new File(path);
-        FileInputStream fin = null;
-        
-        
-        if(fileToSend.exists()){
-            try {
-                OutputStream out = socketToClient.getOutputStream();
-                fin = new FileInputStream(fileToSend.getAbsolutePath());
-                while((nbytes = fin.read(fileChunk))>0){                        
-                        
-                        out.write(fileChunk, 0, nbytes);
-                        out.flush();
-                                                
-                }   
-                fin.close();
-                return "File sent";
-            } catch (FileNotFoundException ex) {
-                return "File not found";
-            } catch (IOException ex) {
-                return "IO exception";
-            }
-        }
-        else{
-            return "File not found!";
-        }
-    }
-
-    public void sendResponse(String resposta){
-        try {
-            ObjectOutputStream oout = new ObjectOutputStream(socketToClient.getOutputStream());
-            oout.writeObject(resposta);
-            oout.flush();
-            System.out.println("Resposta enviada: " + resposta);
-        } catch (IOException ex) {
-            System.out.println("Nao foi possivel enviar resposta ao cliente! " + ex);
-        }
-    }
 }
 
 public class FileServer {

@@ -41,7 +41,6 @@ public interface ICommands {
     String Delete(String path);
     String EditDirName(String path,String newName);
     String EditFileName(String path,String newName);
-    String Cat(String path);
     String Process(String line);
     String ListFiles(String path);
     String MakeDirectory(String path);

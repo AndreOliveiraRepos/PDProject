@@ -25,13 +25,12 @@ public class FileSystem implements Serializable{
         this.localHomeDir = "C:/temp";
         this.workingDirectory = this.localHomeDir;   
     }
-    
-    
-    
+
     //operators
     public String copyFile(String origin,String destiny){
         FileChannel ofc, dfc;
         File sourceFile = new File(origin);
+        destiny+="\\"+sourceFile.getName();
         File destinyFile = new File(destiny);
         if(destinyFile.exists())
             return "File already exists";
@@ -56,6 +55,7 @@ public class FileSystem implements Serializable{
     public String moveFile(String origin,String destiny){
         FileChannel ofc, dfc;
         File sourceFile = new File(origin);
+        destiny+="\\"+sourceFile.getName();
         File destinyFile = new File(destiny);
         if(destinyFile.exists())
             return "File already exists";
@@ -67,7 +67,7 @@ public class FileSystem implements Serializable{
                 ofc.close();
                 dfc.close();
                 sourceFile.delete();
-                return "File copied";
+                return "File moved";
             } catch (FileNotFoundException ex) {
                 return "File not found!";
             } catch (IOException ex) {
@@ -88,7 +88,8 @@ public class FileSystem implements Serializable{
         File fileToDelete = new File(path);
         
         if(fileToDelete.exists() && fileToDelete.isFile()){
-            return "File already exists";
+            fileToDelete.delete();
+            return "File deleted";
         }else if(fileToDelete.exists() && fileToDelete.isDirectory()){
             if(fileToDelete.listFiles().length > 0){
                 return "Directory is not empty";
