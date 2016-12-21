@@ -67,6 +67,7 @@ public class FileSystem implements Serializable{
                 ofc.close();
                 dfc.close();
                 sourceFile.delete();
+                System.out.println("Apaguei.");
                 return "File moved";
             } catch (FileNotFoundException ex) {
                 return "File not found!";

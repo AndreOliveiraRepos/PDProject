@@ -156,7 +156,23 @@ public class ServerCommands implements ICommands {
             case LOGOUT:
                 return "Unknown command type help";
             case MOVE:
-                return this.Move(cmd[1],cmd[2]);
+                if(cmd.length == 3){
+                    
+                    return this.Copy(cmd[1],cmd[2]);
+                }else if(cmd.length == 4){
+                    if(cmd[3].equalsIgnoreCase("DOWNLOAD")){
+                        File f = new File(cmd[1]);
+                        output=this.Upload(cmd[1]);
+                        f.delete();
+                        return output;
+                    }
+                    else if(cmd[3].equalsIgnoreCase("UPLOAD")){
+                        File f = new File(cmd[1]);
+                        System.out.println("CAMINHO: "+cmd[2]+f.getName());
+                        output = this.Download(cmd[2]+"/"+f.getName());
+                        return output;
+                    }
+                }
             case CHANGEDIR:
                 return "Unknown command type help";
             case BACKDIR:
