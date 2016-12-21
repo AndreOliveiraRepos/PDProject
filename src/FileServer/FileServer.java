@@ -3,6 +3,9 @@ package FileServer;
 import common.FileObject;
 import common.FileSystem;
 import common.HeartbeatSender;
+import common.Msg;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,12 +14,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class AtendeCliente extends Thread {
     
@@ -32,7 +39,7 @@ class AtendeCliente extends Thread {
     public static final String GETCONTENTDIR = "LS";
     public static final String GETFILECONTENT = "CAT";
     public static final String MKDIR = "MKDIR";
-    public static final String RMFILE = "RM";
+    public static final String RMFILE = "RM"; //nothing wrong farshad kay
     
     public static boolean listenning;
     
@@ -210,7 +217,7 @@ public class FileServer {
         
         try {
             //Gera porto automático TCP
-            serverSocket = new ServerSocket(7001); //0 //7001
+            serverSocket = new ServerSocket(0); //0 //7001
         } catch (IOException ex) {
             System.out.println("Ocorreu um erro no acesso ao socket:\n\t"+ex);
         }
@@ -224,12 +231,18 @@ public class FileServer {
         }
         
         //Liga ao serviço de directoria e vê se não existe mais nenhum servidor com o mesmo nome
+        
+        try {
+            InetAddress dirAddr = InetAddress.getByName(args[1]);
+            int dirPort = Integer.parseInt(args[2]);
+            String serverName = args[0];
             
-        try {    
-            FileServer fserver = new FileServer(args[0],
-                    InetAddress.getByName(args[1]),
-                    Integer.parseInt(args[2])
-            );
+            if (isDuplicatedName(serverName, dirAddr, dirPort)){
+                System.out.println("Erro: Ja existe um servidor a decorrer com o mesmo nome! ");
+                return;
+            } else System.out.println("Servidor registado no servico de directoria!");
+            
+            FileServer fserver = new FileServer(serverName, dirAddr, dirPort);
             
             connectedClients.add("auth");
             
@@ -276,5 +289,32 @@ public class FileServer {
                 serverSocket.close();
             } catch (IOException e) {}
         }
+    }
+    
+    public static boolean isDuplicatedName(String name, InetAddress addr, int port){
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oOut = new ObjectOutputStream(baos);
+            oOut.writeObject(new Msg(name, "SERVER_AUTH"));
+            oOut.flush();
+            DatagramPacket packet = new DatagramPacket(baos.toByteArray(), baos.size(), addr, port);
+            socket.send(packet);
+            
+            packet = new DatagramPacket(new byte[512], 512);
+            socket.receive(packet);
+            ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
+            Object obj = in.readObject();
+            if (obj instanceof Integer){
+                Integer i = (Integer) obj;
+                return !(i.equals(1));
+            } else System.out.println("Objecto recebido no socket UDP do tipo inesperado! ");
+            
+        } catch (IOException ex) {
+            System.out.println("[Socket UDP] Erro ao enviar pedido ao servico de directoria!" + ex);
+        } catch (ClassNotFoundException ex) {
+            System.out.println("Objecto recebido no socket UDP do tipo inesperado! " + ex);
+        }
+        return true;
     }
 }

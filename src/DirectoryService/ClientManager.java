@@ -74,4 +74,16 @@ public class ClientManager extends Thread {
         while(it.hasNext()) arr.add((ClientEntry)it.next());
         return arr;
     }
+    
+    public String getClientListAsString(ServerManager sm){
+        Iterator it = onlineClients.keySet().iterator();
+        StringBuilder clientsAsString = new StringBuilder();
+        while (it.hasNext()){
+            String c = (String)it.next();
+            if (sm.isAuthenticatedClient(c)){
+                clientsAsString.append(c + "\n");
+            }
+        }
+        return clientsAsString.toString();
+    }
 }

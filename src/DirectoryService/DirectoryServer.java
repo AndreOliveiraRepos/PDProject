@@ -92,18 +92,18 @@ public class DirectoryServer {
         
         private void processCommand(Msg msg) throws IOException
         {
+            //Servidor pergunta ao servico de directoria se se pode registar
+            if(msg.getMsg().equalsIgnoreCase("SERVER_AUTH")){
+                int r = 0;
+                if (!serverManager.existsServer(msg.getName()))
+                    r = 1;
+                udpListener.sendResponse(r);
+            }
+                
             if(msg.getMsg().equalsIgnoreCase(LIST))
                 udpListener.sendResponse(serverManager.getServerList());
             else if (msg.getMsg().equalsIgnoreCase(USERS)){
-                Iterator it = clientManager.getOnlineClients().keySet().iterator();
-                StringBuilder clientsAsString = new StringBuilder();
-                while (it.hasNext()){
-                    String c = (String)it.next();
-                    if (serverManager.isAuthenticatedClient(c)){
-                        clientsAsString.append(c + "\n");
-                    }
-                }
-                udpListener.sendResponse(clientsAsString.toString());
+                udpListener.sendResponse(clientManager.getClientListAsString(serverManager));
             }
             else {
                 String[] args = msg.getMsg().split("\\s");

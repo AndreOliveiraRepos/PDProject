@@ -87,17 +87,14 @@ public class ServerManager extends Thread
     }
     
     public boolean isAuthenticatedClient(String c){
-        /*Iterator it = onlineServers.values().iterator();
-        while (it.hasNext()) {
-            if(((ServerEntry)it.next()).existsClient(c)){
-                return true;
-            }
-        }
-        return false;*/
         for (ServerEntry se : onlineServers.values()){
             if (se.existsClient(c)) return true;
         }
         return false;
+    }
+    
+    public boolean existsServer(String s){
+        return onlineServers.containsKey(s);
     }
     
 //    public Map<String,Integer> getServerMap(){
