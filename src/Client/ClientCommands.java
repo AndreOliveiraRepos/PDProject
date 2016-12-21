@@ -105,6 +105,11 @@ public class ClientCommands /*extends UnicastRemoteObject implements ServerMonit
         view.printContent(s);
     }
     
+    public void updateServerList(String servers){
+        if (lastCommand.equalsIgnoreCase("list"))
+            view.printContent(servers);
+    }
+    
     public void reportError(String e){
         view.printError(e);
     }

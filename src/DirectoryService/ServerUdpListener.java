@@ -43,17 +43,36 @@ public class ServerUdpListener {
         return in.readObject();
     }
     
-    protected <T> void sendResponse(T response) throws IOException
+    protected void sendResponse(Object response) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
-        T r = response;
+        Object r = response;
         oos.writeObject(r);
         oos.flush();
 
         packet.setData(baos.toByteArray());
         packet.setLength(baos.size());
         socket.send(packet);
+    }
+    
+    public void sendData(Object obj, InetAddress addr, int port){
+        try {
+            if (socket == null) return;
+            
+            ByteArrayOutputStream baos;
+            ObjectOutputStream oOut;
+            baos = new ByteArrayOutputStream();
+            oOut = new ObjectOutputStream(baos);
+            oOut.writeObject(obj);
+            oOut.flush();
+            
+            DatagramPacket packet = new DatagramPacket(baos.toByteArray(), baos.size(), addr, port);
+            socket.send(packet);
+            
+        } catch (IOException ex) {
+            System.out.println("[Socket UDP] Erro ao enviar dados ao cliente!" + ex);
+        }
     }
     
     public int getLocalPort(){

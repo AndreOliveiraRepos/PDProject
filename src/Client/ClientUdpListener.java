@@ -28,7 +28,6 @@ public class ClientUdpListener extends Thread
         } catch (SocketException ex) {
             System.out.println("Nao foi possivel criar o socket UDP para escuta! " + ex);
         }
-        
         listening = true;
     }
     
@@ -48,8 +47,9 @@ public class ClientUdpListener extends Thread
                 obj = in.readObject();
 
                 if (obj instanceof String){
-                    //System.out.println((String)obj);
+                    //System.out.println("Recebi: " + (String)obj);
                     output = (String)obj;
+                    updateServerList();
                 } else dispatch("Objecto recebido no socket UDP do tipo inesperado! ");
             }
         } catch (IOException ex) {
@@ -77,5 +77,9 @@ public class ClientUdpListener extends Thread
     
     public void dispatch(String s){
         controller.updateView(s);
+    }
+    
+    public void updateServerList(){
+        controller.updateServerList(output);
     }
 }

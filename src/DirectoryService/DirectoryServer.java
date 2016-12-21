@@ -5,6 +5,7 @@ import common.Heartbeat;
 import common.Msg;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 public class DirectoryServer {
@@ -75,6 +76,7 @@ public class DirectoryServer {
                 ServerHeartbeat hb = (ServerHeartbeat)obj;
                 serverManager.processHeartbeat(hb, udpListener.getCurrentAddr());
                 rmiService.notifyObservers();
+                notifyClients();
             }
             else if (obj instanceof Heartbeat){
                 Heartbeat hb = (Heartbeat)obj;
@@ -130,17 +132,27 @@ public class DirectoryServer {
                         
                         ClientEntry client = (ClientEntry) clientManager.getClient(args[1]);
                         String message = msg.getMsg().substring(3); //tira "msg"
-                        System.out.println("client: "+ client.getName() + " ");
+                        //System.out.println("client: "+ client.getName() + " ");
                         if (serverManager.isAuthenticatedClient(client.getName())){
-                            System.out.println("is authenticated!");
+                            //System.out.println("is authenticated!");
                             chatService.sendMessage(
                                 msg.getName() + ": " + message,
                                 client.getAddr(), client.getPort());
                             udpListener.sendResponse("Mensagem enviada...");
-                        } else System.out.println("is NOT authenticated!");
+                        } //else System.out.println("is NOT authenticated!");
                     } else udpListener.sendResponse("Erro de sintaxe: MSGTO <nome> <message>");
                     
                 } else udpListener.sendResponse("Unknown Command");
+            }
+        }
+        
+        public void notifyClients(){
+            ArrayList<ClientEntry> clients = clientManager.getUserList();
+            for (ClientEntry c : clients){
+                if (serverManager.isAuthenticatedClient(c.getName())){
+                    udpListener.sendData(serverManager.getServerListAsString(), 
+                            c.getAddr(), c.getPort());
+                }
             }
         }
     }

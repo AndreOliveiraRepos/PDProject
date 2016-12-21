@@ -7,6 +7,7 @@ package DirectoryService;
 
 import common.Heartbeat;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -64,5 +65,13 @@ public class ClientManager extends Thread {
     public void stopThread()
     {
         running = false;
+    }
+    
+    public ArrayList<ClientEntry> getUserList(){
+        //return onlineServers.values();
+        ArrayList<ClientEntry> arr = new ArrayList<ClientEntry>();
+        Iterator it = onlineClients.values().iterator();
+        while(it.hasNext()) arr.add((ClientEntry)it.next());
+        return arr;
     }
 }

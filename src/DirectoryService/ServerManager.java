@@ -76,7 +76,7 @@ public class ServerManager extends Thread
         while (it.hasNext()) {
             ServerEntry se = (ServerEntry)it.next();
             //buff.append(entry.getKey() + " - " + entry.getValue().getPort() + "\n");
-            buff.append(se.getName() + "\t" + se.getAddr() + "\t" + se.getPort() + "\n");
+            buff.append(se.getName() + "\t" + se.getAddr().getHostAddress() + "\t" + se.getPort() + "\n");
         }
         return buff.toString();
     }
