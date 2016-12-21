@@ -1,107 +1,55 @@
 package Client;
 
-import common.FileSystem;
-import common.Msg;
-import common.Heartbeat;
-import common.HeartbeatSender;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Client {
     private static final String EXIT = "EXIT";
-    private static final String NAME = "NAME";
-    private static final String CONNECT = "CONNECT";
    
-    private static String name;
-    private static ClientTcpHandler tcpHandler;
-    private static ClientUdpHandler udpHandler;
-    private static HeartbeatSender<Heartbeat> hbSender;
-    private static FileSystemClient clientFileSystem;
+    private static ClientCommands commands;
+    
+    //private static ClientICommands commands;
         
-    public static void main(String[] args) throws ClassNotFoundException {
-        String msg;
+    public static void main(String[] args) {
+        
+        Client observer = new Client();
         
         if(args.length != 2){
             System.out.println("Sintaxe: java Client dirAdress dirUdpPort");
             return;
         }
         
-        name = "guest";
-        
-        try {
-            
-            // Inicializa socket UDP para ler e enviar mensagens ao serviço de directoria
+        try 
+        {
             InetAddress directoryServerAddr = InetAddress.getByName(args[0]);
             Integer directoryServerPort = Integer.parseInt(args[1]);
-            udpHandler = new ClientUdpHandler(directoryServerAddr, directoryServerPort);
-            tcpHandler = new ClientTcpHandler();
             
-            // Enviar heartbeats UDP ao serviço de directoria
-            hbSender = new HeartbeatSender<Heartbeat>(new Heartbeat(udpHandler.getLocalPort(),name),directoryServerAddr, directoryServerPort);
-            hbSender.setDaemon(true);
-            hbSender.start();
-            
-            // exemplo de uso request ao server TCP
-            //tcpHandler.connectToServer(InetAddress.getByName("127.0.0.1"), 7001);
-            /*System.out.println(
-                    tcpHandler.sendRequest("I pedido1 I")
-            );*/
-            /* Exemplo para listagem de comandos
-            OK-NAME luis -> altera o nome para luis
-            OK-EXIT -> sai (já faz isto no while loop)
-            LIST -> lista os servidores ligados
-            MSG -> envia uma mensagem a todos os clientes activos
-            MSGTO luis -> envia uma mensagem ao luis
-            ... o resto dos comandos são enviados ao tcp
-            */
-            clientFileSystem = new FileSystemClient(name);
-            ClientCommands commands = new ClientCommands(udpHandler,tcpHandler);
+            commands = new ClientCommands(observer, directoryServerAddr, directoryServerPort);
+                      
+            String msg;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true){
                 System.out.print("> ");
                 msg = in.readLine();
-
-                if(msg.equalsIgnoreCase(EXIT)){
-                    break;
-                } else {
-                    String[] cmd = msg.split("\\s");
-                    if (cmd[0].equalsIgnoreCase(NAME)){
-                        if (cmd.length == 2){
-                            name = cmd[1];
-                            hbSender.setHeartbeat(new Heartbeat(udpHandler.getLocalPort(),name));
-                            System.out.println("Nome: " + name);
-                            continue;
-                        } else System.out.println("Erro de sintaxe: nome <nome>");
-                    }
-                    else if(cmd[0].equalsIgnoreCase(CONNECT)){
-                        //System.out.println(commands.processRequest(new Msg(name, msg),clientFileSystem));
-                        System.out.println(commands.processRequest(new Msg(name, "connect 127.0.0.1 7001"),clientFileSystem));
-                    }
-                    else{
-                        
-                        System.out.println(commands.processCommands(new Msg(name, msg),clientFileSystem));
-                    }
-                    /*else{
-                        System.out.println(commands.processCommands(new Msg(name, msg), clientFileSystem));
-                    }*/
-                }
-                
+                if(msg.equalsIgnoreCase(EXIT)) break;
+                System.out.println(commands.getClientCommand().Process(msg));
+                //System.out.println(commands.processCommand(msg));
+                //System.out.println(commands.processRequest(msg));
             }
-            udpHandler.closeSocket();
-            tcpHandler.closeSocket();
-            
-            
-        } catch (UnknownHostException ex) {
-            System.out.println("[Cliente] Destino desconhecido:\n\t"+ex);
         } catch (IOException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        }/*catch(ClassNotFoundException e){
-             System.out.println("O objecto recebido não é do tipo esperado:\n\t"+e);
-        }*/
+            System.out.println("Erro ao ler comando! " + ex);
+        }
     }
+    
+    public void printError(String e){
+        System.out.println("Erro: " + e);
+    }
+    
+    public void printContent(String s){
+        System.out.println(s);
+    }
+    
+  
 }

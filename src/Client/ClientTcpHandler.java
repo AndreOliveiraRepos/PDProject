@@ -1,16 +1,11 @@
 package Client;
 
 import common.FileObject;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -22,29 +17,21 @@ public class ClientTcpHandler {
     protected InetAddress serverAddress;
     protected int serverPort;
     protected Socket socketToServer;
+    private boolean online;
     
-    public ClientTcpHandler(/*InetAddress servAddr, Integer servPort*/){
-        /*serverAddress = servAddr;
-        serverPort = servPort;
-        
-        try {
-            socketToServer = new Socket(servAddr, servPort);
-            socketToServer.setSoTimeout(TIMEOUT);
-            socketToServer.
-            
-        } catch(IOException e){
-            System.out.println("Ocorreu um erro no acesso ao socket" + ":\n\t"+e);
-        }*/
+    public ClientTcpHandler()
+    {
         socketToServer = null;
     }
+    
     public boolean connectToServer(InetAddress servAddr, Integer servPort){
         try {
             if(socketToServer != null){
                 socketToServer.close();
             }
             socketToServer = new Socket(servAddr, servPort);
-            //socketToServer.setKeepAlive(true);
             //socketToServer.setSoTimeout(TIMEOUT);
+            online = true;
             return true;
         } catch (IOException e) {
             System.out.println("Ocorreu um erro no acesso ao socket TCP" + ":\n\t"+e);
@@ -64,9 +51,9 @@ public class ClientTcpHandler {
         }
         return obj;
     } 
+    
     public void writeData(Object obj){
         try {
-            
             ObjectOutputStream out = new ObjectOutputStream(socketToServer.getOutputStream());
             out.writeObject(obj);
             out.flush();
@@ -75,7 +62,6 @@ public class ClientTcpHandler {
         }
        
     }
-    
     
     public String sendFile(String path){
         byte[] chunk = new byte[1024];
@@ -118,8 +104,6 @@ public class ClientTcpHandler {
         } catch (IOException ex) {
             return "IO exception";
         }
-        
-        
     }
     
     public void closeSocket(){
@@ -128,5 +112,9 @@ public class ClientTcpHandler {
                 socketToServer.close();
             } catch (IOException ex) {}
         }
+    }
+    
+    public boolean isOnline(){
+        return this.online;
     }
 }
