@@ -17,16 +17,29 @@ public class ServerManager extends Thread
     
     private HashMap<String,ServerEntry> onlineServers;
     private boolean running;
+    private boolean hasChanges;
     
     public ServerManager()
     {
         onlineServers = new HashMap<String,ServerEntry>();
         running = true;
+        hasChanges = false;
+    }
+    
+    public boolean hasChanges(){
+        if (hasChanges){
+            hasChanges = false;
+            return true;
+        }
+        return false;
     }
     
     public void processHeartbeat(ServerHeartbeat hb, InetAddress hbAddr) throws RemoteException{
+        Integer previousCount = onlineServers.size();
         ServerEntry se = new ServerEntry(hb, hbAddr);
         onlineServers.put(se.getName(),se);
+        if (!(previousCount.equals(onlineServers.size())))
+            hasChanges = true;
     }
     
     @Override
@@ -44,6 +57,7 @@ public class ServerManager extends Thread
                     System.out.print("\t Ultimo hb: "+(systemSeconds - timestampSeconds)+ " segundos.\n");
                     if((systemSeconds - timestampSeconds) > ACCEPTED_INTERVAL){
                         it.remove();
+                        hasChanges = true;
                         //onlineServers.remove(entry.getKey());
                     }
                     //it.remove(); //iterador

@@ -103,11 +103,10 @@ public class ClientUdpHandler{
     private String getAvailableServers(){
         
         StringBuilder buff = new StringBuilder();
-        Iterator it = availableServers.iterator();
-        buff.append("\n");
-        while (it.hasNext()) {
-            ServerEntry se = (ServerEntry)it.next();
-            buff.append(se.getName() + "\t" + se.getAddr().getHostAddress() + "\t" + se.getPort() + "\n");
+        for (ServerEntry se : availableServers){
+            //buff.append(se.getName() + "\t" + se.getAddr().getHostAddress() + "\t" + se.getPort() + "\n");
+            buff.append(se.toString() + "\n");
+
         }
         return buff.toString();
     }

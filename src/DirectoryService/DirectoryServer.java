@@ -75,12 +75,17 @@ public class DirectoryServer {
             if (obj instanceof ServerHeartbeat){
                 ServerHeartbeat hb = (ServerHeartbeat)obj;
                 serverManager.processHeartbeat(hb, udpListener.getCurrentAddr());
-                rmiService.notifyObservers();
-                notifyClients();
+                if (serverManager.hasChanges()){
+                    rmiService.notifyObservers();
+                    updateServerList();
+                }
             }
             else if (obj instanceof Heartbeat){
                 Heartbeat hb = (Heartbeat)obj;
-                clientManager.processHeartbeat(hb,udpListener.getCurrentAddr());
+                // Se o presente heartbeat alterar a estrutura de dados, os clientes devem de ser notificados
+                clientManager.processHeartbeat(hb,udpListener.getCurrentAddr(),serverManager);
+                if (clientManager.hasChanges())
+                    updateUserList();
             }
             else if (obj instanceof Msg)
                 processCommand((Msg)obj);
@@ -146,11 +151,21 @@ public class DirectoryServer {
             }
         }
         
-        public void notifyClients(){
+        public void updateServerList(){
+            ArrayList<ClientEntry> clients = clientManager.getUserList();
+            for (ClientEntry c : clients){
+                //if (serverManager.isAuthenticatedClient(c.getName())){
+                    udpListener.sendData(serverManager.getServerList(), 
+                            c.getAddr(), c.getPort());
+                //}
+            }
+        }
+        
+        public void updateUserList(){
             ArrayList<ClientEntry> clients = clientManager.getUserList();
             for (ClientEntry c : clients){
                 if (serverManager.isAuthenticatedClient(c.getName())){
-                    udpListener.sendData(serverManager.getServerListAsString(), 
+                    udpListener.sendData(clientManager.getUserList(), 
                             c.getAddr(), c.getPort());
                 }
             }

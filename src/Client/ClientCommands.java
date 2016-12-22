@@ -106,16 +106,26 @@ public class ClientCommands /*extends UnicastRemoteObject implements ServerMonit
     }
     
     public void updateServerList(String servers){
-        if (lastCommand.equalsIgnoreCase("list"))
+        if (lastCommand.equalsIgnoreCase(LIST))
             view.printContent(servers);
+    }
+    
+    public void updateUserList(String users){
+        if (lastCommand.equalsIgnoreCase(USERS)){
+            view.printContent(users);
+        }
     }
     
     public void reportError(String e){
         view.printError(e);
     }
     
-    public RemoteServiceInterface getRmiService(){
+    /*public RemoteServiceInterface getRmiService(){
         return rmiClient.getService();
+    }*/
+    
+    public String getClientName(){
+        return clientName;
     }
     
     public void terminate(){

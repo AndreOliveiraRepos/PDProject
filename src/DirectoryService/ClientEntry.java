@@ -13,4 +13,9 @@ public class ClientEntry extends common.Entry{
     public ClientEntry(Heartbeat hb, InetAddress hbAddr) {
         super(hb, hbAddr);
     }
+    
+    @Override
+    public String toString(){
+        return name;
+    }
 }

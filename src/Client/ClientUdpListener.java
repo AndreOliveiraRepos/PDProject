@@ -1,5 +1,7 @@
 package Client;
 
+import DirectoryService.ClientEntry;
+import DirectoryService.ServerEntry;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -7,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 
 public class ClientUdpListener extends Thread
 {    
@@ -18,7 +21,11 @@ public class ClientUdpListener extends Thread
     private ClientCommands controller;
     
     private boolean listening;
+    
+    //Received data
     private String output;
+    ArrayList<ServerEntry> servers;
+    ArrayList<ClientEntry> clients;
     
     public ClientUdpListener(ClientCommands c){
         controller = c;
@@ -46,11 +53,31 @@ public class ClientUdpListener extends Thread
                 in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
                 obj = in.readObject();
 
-                if (obj instanceof String){
+                /*if (obj instanceof String){
                     //System.out.println("Recebi: " + (String)obj);
                     output = (String)obj;
                     updateServerList();
-                } else dispatch("Objecto recebido no socket UDP do tipo inesperado! ");
+                } else dispatch("Objecto recebido no socket UDP do tipo inesperado! ");*/
+                try
+                {
+                    if(obj instanceof ArrayList<?>)
+                    {
+                        if(((ArrayList<?>)obj).get(0) instanceof ServerEntry)
+                        {
+                            servers = (ArrayList<ServerEntry>) obj;
+                            updateServerList();
+                        }
+                        else if(((ArrayList<?>)obj).get(0) instanceof ClientEntry)
+                        {
+                            clients = (ArrayList<ClientEntry>) obj;
+                            updateUserList();
+                        } else System.out.println("Erro: ArrayList de objectos nao conhecidos!");
+                    }
+                }
+                catch(NullPointerException e)
+                {
+                    System.out.println("Erro ao receber objecto no listener UDP!" + e);
+                }
             }
         } catch (IOException ex) {
             System.out.println("Erro ao receber dados no socket UDP de escuta! " + ex);
@@ -80,6 +107,20 @@ public class ClientUdpListener extends Thread
     }
     
     public void updateServerList(){
-        controller.updateServerList(output);
+        StringBuilder os = new StringBuilder();
+        os.append("Lista de servidores ligados: \n");
+        for (ServerEntry s : servers){
+            os.append("\t" + s.toString() + "\n");
+        }
+        controller.updateServerList(os.toString());
+    }
+    
+    public void updateUserList(){
+        StringBuilder os = new StringBuilder();
+        os.append("Lista de clientes ligados: \n");
+        for (ClientEntry c : clients){
+            os.append(c.toString() + "\n");
+        }
+        controller.updateUserList(output);
     }
 }

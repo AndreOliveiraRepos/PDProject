@@ -18,15 +18,37 @@ public class ClientManager extends Thread {
     
     private HashMap<String,ClientEntry> onlineClients;
     private boolean running;
+    private boolean hasChanges;
     
     public ClientManager(){
         onlineClients = new HashMap<String,ClientEntry>();
         running = true;
+        hasChanges = false;
     }
     
-    public void processHeartbeat(Heartbeat hb, InetAddress hbAddr){
+    public void processHeartbeat(Heartbeat hb, InetAddress hbAddr, ServerManager sm){
+        Integer nClients = getNumAuthenticatedClients(sm);
         ClientEntry ce = new ClientEntry(hb, hbAddr);
         onlineClients.put(ce.getName(),ce);
+        
+        if(nClients.equals(getNumAuthenticatedClients(sm)))
+            hasChanges = true;
+    }
+    
+    public boolean hasChanges(){
+        if (hasChanges){
+            hasChanges = false;
+            return true;
+        }
+        return false;
+    }
+    
+    public int getNumAuthenticatedClients(ServerManager sm){
+        int total = 0;
+        for (String c : onlineClients.keySet()){
+            if (sm.isAuthenticatedClient(c)) ++total;
+        }
+        return total;
     }
     
     public ClientEntry getClient(String c){
@@ -47,6 +69,7 @@ public class ClientManager extends Thread {
                     double systemSeconds = (double)System.nanoTime() / 1000000000.0;
                     if((systemSeconds - timestampSeconds) > ACCEPTED_INTERVAL){
                         it.remove();
+                        hasChanges = true;
                     }
                 }
             }

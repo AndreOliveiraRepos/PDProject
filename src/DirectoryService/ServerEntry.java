@@ -22,4 +22,9 @@ public class ServerEntry extends common.Entry implements Serializable{
     public boolean existsClient(String c){
         return connectedClients.contains(c);
     }
+    
+    @Override
+    public String toString(){
+        return ("" + name + "\t" + address.getHostAddress() + "\t" + port );
+    }
 }

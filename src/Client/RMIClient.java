@@ -65,17 +65,24 @@ public class RMIClient extends UnicastRemoteObject implements ServerMonitorListe
     public void printServers() throws RemoteException {
         if (commands.getLastCommand().equalsIgnoreCase("LIST")){
             StringBuilder out = new StringBuilder();
-            out.append("Nao esta autenticado nos servidores: ");
-            
+            //out.append("Lista nos quais nao esta autenticado: ");
+            boolean atLeastOneElementFlag = false;
             ArrayList<ServerEntry> serverList = rmiService.getServerList();
             Iterator sit = serverList.iterator();
             while (sit.hasNext()){
                 ServerEntry se = (ServerEntry)sit.next();
-                if (!se.existsClient("luis"))
-                out.append("\n" + se.getName() + "\t" + se.getAddr().getHostAddress() + "\t" + se.getPort());
+                if (!se.existsClient(commands.getClientName())){
+                //out.append("\n\t" + se.getName() + "\t" + se.getAddr().getHostAddress() + "\t" + se.getPort());
+                    out.append("\n\t" + se.toString());
+                    atLeastOneElementFlag = true;
+                }
             }
-            output = out.toString();
-            System.out.println(output);
+            if (atLeastOneElementFlag){
+                output = "Lista nos quais nao esta autenticado: " + out.toString();
+            }
+            else output = "";
+            //System.out.println(output);
+            commands.updateServerList(output);
         }
     }
 }
