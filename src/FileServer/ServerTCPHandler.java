@@ -112,13 +112,17 @@ public class ServerTCPHandler {
                 //nbytes = fin.read(fileChunk);
                 while(true){                    
 
-                    fObj = (FileObject)ois.readObject();
+                    Object obj = ois.readObject();
+                    // 
                     //System.out.println("Recebido o bloco n. " + ++contador + " com " + fObj.getnBytes() + " bytes.");
-                    if(fObj.isIsEOF())
-                        break;
-
-
-                    fos.write(fObj.getFileChunk(), 0, fObj.getnBytes());
+                    if(obj instanceof String){
+                        return (String)obj;
+                    }else{
+                        fObj = (FileObject)obj;
+                        if(fObj.isIsEOF())
+                            break;
+                        fos.write(fObj.getFileChunk(), 0, fObj.getnBytes());
+                    }
                     //System.out.println("Acrescentados " + fObj.getnBytes() + " bytes ao ficheiro " + path+ ".");
 
                 }  

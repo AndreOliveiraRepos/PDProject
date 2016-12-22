@@ -29,6 +29,8 @@ public interface ICommands {
     public static final String GETFILECONTENT = "CAT";
     public static final String MKDIR = "MKDIR";
     public static final String RMFILE = "RM";
+    public static final String RENAMEDIR = "REN";
+    public static final String RENAMEFILE = "REF";
     
     String Connect(String[] args);
     String Login();
@@ -45,5 +47,10 @@ public interface ICommands {
     String ListFiles(String path);
     String MakeDirectory(String path);
     String CatFile(String path);
+    String ChangeDirectory(String folder);
+    String BackDirectory(String currentPath);
+    String RenameDirectory(String path,String newName);
+    String RenameFile(String path, String newName);
+    
     
 }

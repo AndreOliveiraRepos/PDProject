@@ -15,12 +15,12 @@ public class ClientUdpListener extends Thread
     private DatagramSocket socket;
     private DatagramPacket packet;
     
-    private ClientCommands controller;
+    private Client controller;
     
     private boolean listening;
     private String output;
     
-    public ClientUdpListener(ClientCommands c){
+    public ClientUdpListener(Client c){
         controller = c;
         
         try {

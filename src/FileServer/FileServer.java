@@ -75,7 +75,7 @@ public class FileServer {
     private static HeartbeatSender<ServerHeartbeat> hbSender;
     private static boolean online;
     
-    private int threadId;
+    private static int threadId;
     private static ServerSocket serverSocket;  //TCP Server
     
     private static ArrayList<String> connectedClients;
@@ -100,50 +100,51 @@ public class FileServer {
             System.out.println("Ocorreu um erro no acesso ao socket:\n\t"+ex);
         }
     }
-    
-    public static void main(String[] args) {
-          
-        if(args.length != 3){
-            System.out.println("Sintaxe: java FileServer serverName dirServerAddress dirServerUdpPort");
-            return;
-        }
-        
-        //Liga ao serviço de directoria e vê se não existe mais nenhum servidor com o mesmo nome
-            
-        try {    
-            FileServer fserver = new FileServer(args[0],
-                    InetAddress.getByName(args[1]),
-                    Integer.parseInt(args[2])
-            );
-            
-            connectedClients.add("auth");
-            
-            //Inicializar heartbeat/Packets UDP
-            hbSender = new HeartbeatSender<ServerHeartbeat>(directoryServerAddr, directoryServerPort);
-            hbSender.setDaemon(true);
-            hbSender.start();
-            
-            hbSender.setHeartbeat(
-                new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients)
-            );
-            fserver.processRequests();
-            //Esperar que a thread termine
-            hbSender.join();
-              
-        } catch (UnknownHostException ex) {
-            System.out.println("Destino desconhecido:\n\t"+ex);
-        } catch (InterruptedException ex) {
-            System.out.println("Erro na thread UDP:\n\t"+ex);
-        }   
+
+    public static String getName() {
+        return name;
     }
+
+    public static InetAddress getDirectoryServerAddr() {
+        return directoryServerAddr;
+    }
+
+    public static int getDirectoryServerPort() {
+        return directoryServerPort;
+    }
+
+    public static HeartbeatSender<ServerHeartbeat> getHbSender() {
+        return hbSender;
+    }
+
+    public static boolean isOnline() {
+        return online;
+    }
+
+    public int getThreadId() {
+        return threadId;
+    }
+
+    public ArrayList<String> getConnectedClients(){ return this.connectedClients;}
+    
+    public ServerSocket getServerSocket(){ return this.serverSocket;}
+    
+    public FileSystem getServerFileSystem(){ return this.serverFileSystem;}
     
     public void goOffline(){
         online = false;
     }
     
+    public void goOnline(){
+        this.startHearbeat();
+        
+        
+        
+    }
+    
     public void processRequests(){
         Socket socketToClient;
-        
+        System.out.println("ESTADO: " + this.online);
         // Verificar se o socket do servidor foi inicializado
         if (serverSocket == null) return;
         
@@ -152,6 +153,7 @@ public class FileServer {
         try {
             while(online){
                 socketToClient = serverSocket.accept();
+                //System.out.println("ACEITEI");
                 (new AtendeCliente(socketToClient, threadId++, name, serverFileSystem)).start();
             }
         } catch (IOException ex) {
@@ -161,5 +163,62 @@ public class FileServer {
                 serverSocket.close();
             } catch (IOException e) {}
         }
+    }
+
+    public static void setName(String name) {
+        FileServer.name = name;
+    }
+
+    public static void setDirectoryServerAddr(InetAddress directoryServerAddr) {
+        FileServer.directoryServerAddr = directoryServerAddr;
+    }
+
+    public static void setDirectoryServerPort(int directoryServerPort) {
+        FileServer.directoryServerPort = directoryServerPort;
+    }
+
+    public static void setHbSender(HeartbeatSender<ServerHeartbeat> hbSender) {
+        FileServer.hbSender = hbSender;
+    }
+
+    public static void setOnline(boolean online) {
+        FileServer.online = online;
+    }
+
+    public void setThreadId(int threadId) {
+        this.threadId = threadId;
+    }
+
+    public static void setServerSocket(ServerSocket serverSocket) {
+        FileServer.serverSocket = serverSocket;
+    }
+
+    public static void setConnectedClients(ArrayList<String> connectedClients) {
+        FileServer.connectedClients = connectedClients;
+    }
+
+    public static void setServerFileSystem(FileSystem serverFileSystem) {
+        FileServer.serverFileSystem = serverFileSystem;
+    }
+    
+    public void startHearbeat(){
+        try {
+            this.online = true;
+            hbSender = new HeartbeatSender<ServerHeartbeat>(directoryServerAddr, directoryServerPort);
+            hbSender.setDaemon(true);
+            hbSender.start();
+
+            hbSender.setHeartbeat(
+                new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients)
+            );
+            processRequests();
+           
+        
+            //Esperar que a thread termine
+            hbSender.join();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(FileServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
     }
 }

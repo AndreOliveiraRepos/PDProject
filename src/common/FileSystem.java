@@ -16,21 +16,18 @@ public class FileSystem implements Serializable{
     private String localHomeDir;
     private String workingDirectory;
     private String ownerName;
-    
-    
-    
+
     public FileSystem(String name){
         this.ownerName = name;
         //this.localHomeDir = "C:\\temp\\"+clientName;
         this.localHomeDir = "C:/temp";
         this.workingDirectory = this.localHomeDir;   
     }
-
     //operators
     public String copyFile(String origin,String destiny){
         FileChannel ofc, dfc;
         File sourceFile = new File(origin);
-        destiny+="\\"+sourceFile.getName();
+        destiny+="/"+sourceFile.getName();
         File destinyFile = new File(destiny);
         if(destinyFile.exists())
             return "File already exists";
@@ -51,11 +48,10 @@ public class FileSystem implements Serializable{
         
         
     }
-    
     public String moveFile(String origin,String destiny){
         FileChannel ofc, dfc;
         File sourceFile = new File(origin);
-        destiny+="\\"+sourceFile.getName();
+        destiny+="/"+sourceFile.getName();
         File destinyFile = new File(destiny);
         if(destinyFile.exists())
             return "File already exists";
@@ -76,15 +72,12 @@ public class FileSystem implements Serializable{
             }
         }
     }
-    
     public void setWorkingDir(String wd){
         this.workingDirectory = wd;
     }
-    
     public String getWorkingDir(){
         return this.workingDirectory;
     }
-    
     public String deleteFile(String path){
         File fileToDelete = new File(path);
         
@@ -103,7 +96,6 @@ public class FileSystem implements Serializable{
             return "File or Directory not found!";
         }
     }
-    
     public String editFileName(String path, String newName){
         File fileToEdit = new File(path);
         File fileRenamed = new File(newName);
@@ -111,16 +103,21 @@ public class FileSystem implements Serializable{
             if(fileRenamed.exists() && fileRenamed.isFile()){
                 return "Already exists a file with that name";
             }else{
-                fileToEdit.renameTo(fileRenamed);
-                return "File renamed";
+                if(fileToEdit.renameTo(fileRenamed)){
+                    return "File renamed to " + fileRenamed.getName();
+                }
+                else{
+                    return "Could not rename file";
+                }
+                
+               
             }
         }else{
-            return "";
+            return "No such file";
         }
         
         
     }
-    
     public String editDirectoryName(String path, String newName){
         File dirToEdit = new File(path);
         File dirRenamed = new File(newName);
@@ -128,14 +125,18 @@ public class FileSystem implements Serializable{
             if(dirRenamed.exists() && dirRenamed.isDirectory()){
                 return "Already exists a folder with that name";
             }else{
-                dirToEdit.renameTo(dirRenamed);
-                return "Folder renamed";
+                
+                if(dirToEdit.renameTo(dirRenamed)){
+                    return "Folder renamed to " + dirRenamed.getName();
+                }
+                else{
+                    return "Could not rename folder";
+                }
             }
         }else{
-            return "";
+            return "No such folder";
         }
     }
-    
     public String listDirectoryContent(String path){
         String output = "";
         File folder = new File(path);
@@ -145,6 +146,7 @@ public class FileSystem implements Serializable{
                 File[] listOfFiles = folder.listFiles();
                 for (int i = 0; i < listOfFiles.length; i++) {
                     if (listOfFiles[i].isFile()) {
+                      
                       output+="[F]:" + listOfFiles[i].getName() + "\n";
                     } else if (listOfFiles[i].isDirectory()) {
                       output+="[D]:" + listOfFiles[i].getName() + "\n";
@@ -159,29 +161,12 @@ public class FileSystem implements Serializable{
             output = "Directory not found!";
             
         }
-        //File[] listOfFiles = folder.listFiles();
         
-        /*if(listOfFiles != null){
-            output+=fullPath + "\n";
-            for (int i = 0; i < listOfFiles.length; i++) {
-                if (listOfFiles[i].isFile()) {
-                  output+="[F]:" + listOfFiles[i].getName() + "\n";
-                } else if (listOfFiles[i].isDirectory()) {
-                  output+="[D]:" + listOfFiles[i].getName() + "\n";
-                }
-            }
-            //output += "[]";
-        }else{
-            
-            output+=fullPath + "\n"+"empty:";
-        }*/
         
         return output;
     
     }
-    
     public String getName(){return this.ownerName;}
-    
     public String makeDirectory(String path){
 
         File newDir = new File(path);
@@ -196,8 +181,7 @@ public class FileSystem implements Serializable{
            
         }
         
-    }   
-    
+    }      
     public String fileCat(String path){
         File fileToRead = new File(path);
         if(fileToRead.exists() && fileToRead.isFile()){
@@ -225,6 +209,45 @@ public class FileSystem implements Serializable{
         }
         else
             return "File not found";
+    }
+    public String changeDir(String folder){
+        File folderToGo = new File(this.workingDirectory+"/"+folder);
+        if (folderToGo.exists() && folderToGo.isDirectory()) {
+           
+                
+            this.workingDirectory = folderToGo.getPath();
+            this.workingDirectory = this.workingDirectory.replace('\\','/');
+            return "Now working on " + this.workingDirectory;
+            
+        }else{
+            return "No such directory";
+        }
+        
+        
+    }
+    public String backDir(String currentDir){
+        String resposta;
+        resposta = "";
+        String[] npath = currentDir.split("/");
+        System.out.println("N CAMINHO" + npath.length+"\n"+npath);
+        if(npath.length < 2){
+                                
+            resposta = "No such dir";
+            return resposta;
+        }else{
+
+
+            resposta = "";
+            for(int i = 0;i < npath.length-1;i++){
+
+                resposta+= npath[i] + "/";
+            }
+            this.workingDirectory = resposta;
+            return resposta;
+            //resposta = convertedPath;
+        }
+    
+       
     }
 }
     

@@ -24,12 +24,12 @@ public class RMIClient extends UnicastRemoteObject implements ServerMonitorListe
 
     private String addr;
     private int port;
-    private ClientCommands commands;
+    private Client commands;
     
     RemoteServiceInterface rmiService;
     String output;
 
-    public RMIClient(String addr, int port, ClientCommands cmd) throws RemoteException
+    public RMIClient(String addr, int port, Client cmd) throws RemoteException
     {
         this.addr = addr;
         this.port = port;

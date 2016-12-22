@@ -49,14 +49,15 @@ public class ServerCommands implements ICommands {
     @Override
     public String Download(String path) {
         
-        output = tcpHandler.receiveFile(path+"\n");
-        output += "[Server]"+(String)tcpHandler.readData();
+        output = tcpHandler.receiveFile(path);
+        //tcpHandler.writeData("[Server] "+output);
         return output;
     }
 
     @Override
     public String Upload(String path) {
         output = tcpHandler.sendFile(path);
+        //tcpHandler.writeData("[Server] "+output);
         return output;
     }
 
@@ -80,12 +81,15 @@ public class ServerCommands implements ICommands {
 
     @Override
     public String EditDirName(String path, String newName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        output = serverFileSystem.editDirectoryName(path, newName);
+        return output;
     }
 
     @Override
     public String EditFileName(String path, String newName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        output = serverFileSystem.editFileName(path, newName);
+        return output;
+        
     }
 
     @Override
@@ -93,7 +97,7 @@ public class ServerCommands implements ICommands {
         
         String[] cmd = line.split("\\s");
         
-        if(cmd.length < 1){
+        if(cmd.length == 2){
             String rep;
             if(cmd[1].contains("remote"+serverFileSystem.getName())){
                 rep = cmd[1].replace("remote"+serverFileSystem.getName()+"/","C:/");
@@ -163,7 +167,7 @@ public class ServerCommands implements ICommands {
                     if(cmd[3].equalsIgnoreCase("DOWNLOAD")){
                         File f = new File(cmd[1]);
                         output=this.Upload(cmd[1]);
-                        f.delete();
+                        //f.delete();
                         return output;
                     }
                     else if(cmd[3].equalsIgnoreCase("UPLOAD")){
@@ -174,9 +178,10 @@ public class ServerCommands implements ICommands {
                     }
                 }
             case CHANGEDIR:
-                return "Unknown command type help";
+                
+                return this.ChangeDirectory(cmd[1] + "/" + cmd[2]);
             case BACKDIR:
-                return "Unknown command type help";
+                return this.BackDirectory(cmd[1]);
             case GETCONTENTDIR:
                 return this.ListFiles(cmd[1]);
             case GETFILECONTENT:
@@ -185,6 +190,11 @@ public class ServerCommands implements ICommands {
                 return this.MakeDirectory(cmd[1]);
             case RMFILE:
                 return this.Delete(cmd[1]);
+            case RENAMEFILE:
+                
+                return this.EditFileName(cmd[1], cmd[2]);
+            case RENAMEDIR:
+                return this.EditDirName(cmd[1], cmd[2]);
             default:
                 return "Unknown command type help";
         }
@@ -192,7 +202,7 @@ public class ServerCommands implements ICommands {
 
     @Override
     public String ListFiles(String path) {
-        
+        System.out.println("CAMINHO LS:" + path);
         return serverFileSystem.listDirectoryContent(path);
     }
 
@@ -205,6 +215,51 @@ public class ServerCommands implements ICommands {
     @Override
     public String CatFile(String path) {
         output = serverFileSystem.fileCat(path);
+        return output;
+    }
+
+    @Override
+    public String ChangeDirectory(String path) {
+        System.out.println("CAMINHO:" + path);
+        File f = new File(path);
+        if (f.exists() && f.isDirectory())
+            return "ok";
+        else
+            return "no";
+    }
+
+    @Override
+    public String BackDirectory(String currentPath) {
+        String resposta = "";
+        String[] npath = currentPath.split("/");
+        if(npath.length-1 < 2){
+                                
+            currentPath = currentPath.replace("C:/","remote"+serverFileSystem.getName()+"/");
+            return currentPath;
+        }else{
+
+
+            resposta = "";
+            for(int i = 0;i < npath.length-1;i++){
+
+                resposta+= npath[i] + "/";
+            }
+            resposta = resposta.replace("C:/","remote"+serverFileSystem.getName()+"/");
+            return resposta;
+            //resposta = convertedPath;
+        }
+        
+    }
+
+    @Override
+    public String RenameDirectory(String path, String newName) {
+        output = this.serverFileSystem.editDirectoryName(path, newName);
+        return output;
+    }
+
+    @Override
+    public String RenameFile(String path, String newName) {
+        output = this.serverFileSystem.editFileName(path, newName);
         return output;
     }
 
