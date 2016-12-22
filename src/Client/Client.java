@@ -74,21 +74,7 @@ public class Client /*extends UnicastRemoteObject implements ServerMonitorListen
             rmiClient.run();
         }
         clientCommands.Process(msg);
-        /*String[] args = msg.split("\\s");
-        if (args[0].equalsIgnoreCase(NAME)){
-            changeName(args); return "";
-        } else if (args[0].equalsIgnoreCase("HELP"))
-            return commandList();
-        else if (isUdpCommand(args[0]))
-            return udpHandler.sendRequest(new Msg(clientName,msg));
-        else if (isTcpCommand(args[0])){
-            if (args[0].equalsIgnoreCase(CONNECT)){
-                connectToTCPServer(args);
-            } else {
-                tcpHandler.writeData(msg);
-                return (String) tcpHandler.readData();
-            }
-        } else return "Comando desconhecido! Digite: help";*/
+        
         return "-";
     }
     
@@ -189,7 +175,9 @@ public class Client /*extends UnicastRemoteObject implements ServerMonitorListen
         Client.udpListener = udpListener;
     }
     
-    
+    public void setRemoteDir(String path){
+        this.remoteWorkingDir = path;
+    }
     
     
 }

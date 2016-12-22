@@ -8,6 +8,7 @@ package Client;
 import common.FileSystem;
 import common.Heartbeat;
 import common.ICommands;
+import common.Msg;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
  * @author André Oliveira
  */
 public class ClientCommands implements ICommands{
-    private static final String NAME = "NAME";
+    //private static final String NAME = "NAME";
     private static final String LIST = "LIST";
     private static final String MSG = "MSG";
     private static final String USERS = "USERS";
@@ -48,20 +49,7 @@ public class ClientCommands implements ICommands{
     }
 
     
-    @Override
-    public String Login() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String Logout() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String Register() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 
     @Override
     public String Download(String path) {
@@ -123,14 +111,17 @@ public class ClientCommands implements ICommands{
     public String Process(String line) {
         //validar argumentos do split
         String[] cmd = line.split("\\s");
-        this.lastCommand = cmd[0].toUpperCase();
+        
         switch(cmd[0].toUpperCase()){
             case CONNECT:
+                this.lastCommand = cmd[0].toUpperCase();
                 return this.Connect(cmd);
             case COPY:
                 
                 if(cmd[1].contains("remote") && !cmd[2].contains("remote")){
-            
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                            return "You need to login";
+                    }
                     if(tcpHandler.isOnline()){
                          tcpHandler.writeData("cp " + cmd[1] + " " + cmd[2] + " DOWNLOAD");
                          File f = new File(cmd[1]);
@@ -141,6 +132,9 @@ public class ClientCommands implements ICommands{
                         output = "You are offline!";
                     }
                     }else if(!cmd[1].contains("remote") && cmd[2].contains("remote")){
+                        if(this.client.getClientName().equalsIgnoreCase("guest")){
+                            return "You need to login";
+                        }
                         if(tcpHandler.isOnline()){
                              tcpHandler.writeData("cp "+ cmd[1]+" "+cmd[2]+" UPLOAD");
                              File f = new File(cmd[1]);
@@ -151,7 +145,9 @@ public class ClientCommands implements ICommands{
                             output = "You are offline!";
                         }
                     }else if(cmd[1].contains("remote") && cmd[2].contains("remote")){
-
+                        if(this.client.getClientName().equalsIgnoreCase("guest")){
+                            return "You need to login";
+                        }
                         if(tcpHandler.isOnline()){
                              tcpHandler.writeData("cp "+ cmd[1]+" "+cmd[2]);
                              output = "[Server]"+(String)tcpHandler.readData();
@@ -162,17 +158,30 @@ public class ClientCommands implements ICommands{
                     }else{
                         output = clientFileSystem.moveFile(cmd[1], cmd[2]);
                     }
-
+                    this.lastCommand = cmd[0].toUpperCase();
                     return output;
             case REGISTER:
-                return "Unknown command type help";
+                if(cmd.length == 3)
+                    return this.Register(cmd[1],cmd[2]);
+                else
+                    return "Wrong command. Use register <user> <pass>";
             case LOGIN:
-                return "Unknown command type help";
+                if(cmd.length == 3)
+                    return this.Login(cmd[1],cmd[2]);
+                else
+                    return "Wrong command. Use login <user> <pass>";
             case LOGOUT:
-                return "Unknown command type help";
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
+                    return this.Logout(client.getClientName());
+                
             case MOVE:
                 if(cmd[1].contains("remote") && !cmd[2].contains("remote")){
             //download
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     if(tcpHandler.isOnline()){
                          tcpHandler.writeData("cp " + cmd[1] + " " + cmd[2] + " DOWNLOAD");
                          File f = new File(cmd[1]);
@@ -183,6 +192,9 @@ public class ClientCommands implements ICommands{
                         output = "You are offline!";
                     }
                 }else if(!cmd[1].contains("remote") && cmd[2].contains("remote")){
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     if(tcpHandler.isOnline()){
                          tcpHandler.writeData("cp "+ cmd[1]+" "+cmd[2]+" UPLOAD");
                          File f = new File(cmd[1]);
@@ -193,7 +205,9 @@ public class ClientCommands implements ICommands{
                         output = "You are offline!";
                     }
                 }else if(cmd[1].contains("remote") && cmd[2].contains("remote")){
-
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     if(tcpHandler.isOnline()){
                          tcpHandler.writeData("cp "+ cmd[1]+" "+cmd[2]);
                          output = "[Server]"+(String)tcpHandler.readData();
@@ -208,6 +222,9 @@ public class ClientCommands implements ICommands{
                 return output;
             case CHANGEDIR:
                 if(cmd.length > 2 && cmd[1].contains("remote")){
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     if(!tcpHandler.isOnline()){return "You are not connected!";}
                     System.out.println("CAMINHO REMOTO " + this.remoteWorkingDir);
                     tcpHandler.writeData("cd "+ this.remoteWorkingDir +" "+ cmd[2]);
@@ -228,6 +245,9 @@ public class ClientCommands implements ICommands{
                 
             case BACKDIR:
                 if(cmd.length > 1 && cmd[1].contains("remote")){
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     tcpHandler.writeData("cd.. "+ this.remoteWorkingDir);
                     String resp = (String)tcpHandler.readData();
                     this.remoteWorkingDir = resp;
@@ -244,6 +264,9 @@ public class ClientCommands implements ICommands{
                     return this.ListFiles(clientFileSystem.getWorkingDir());
             case GETFILECONTENT:
                 if(cmd[1].contains("remote")){
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     tcpHandler.writeData("cat "+ cmd[1]);
                     output = "[Server]"+(String)tcpHandler.readData();
                     return output;
@@ -252,6 +275,9 @@ public class ClientCommands implements ICommands{
                 }
             case MKDIR:
                 if(cmd[1].contains("remote")){
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     tcpHandler.writeData("mkdir "+ cmd[1]);
                     output = "[Server]"+(String)tcpHandler.readData();
                     return output;
@@ -261,6 +287,9 @@ public class ClientCommands implements ICommands{
                 }
             case RMFILE:
                 if(cmd[1].contains("remote")){
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     tcpHandler.writeData("rm "+ cmd[1]);
                     output = "[Server]"+(String)tcpHandler.readData();
                     return output;
@@ -270,6 +299,9 @@ public class ClientCommands implements ICommands{
                 }
             case RENAMEDIR:
                 if(cmd[1].equalsIgnoreCase("remote")&& cmd.length==4){
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     tcpHandler.writeData("ren "+ this.remoteWorkingDir +"/"+cmd[2] + " " + this.remoteWorkingDir +"/"+cmd[3]);
                     output = "[Server]"+(String)tcpHandler.readData();
                     return output;
@@ -278,7 +310,11 @@ public class ClientCommands implements ICommands{
                     return output;
                 }
             case RENAMEFILE:
+                
                 if(cmd[1].equalsIgnoreCase("remote")&& cmd.length==4){
+                    if(this.client.getClientName().equalsIgnoreCase("guest")){
+                        return "You need to login";
+                    }
                     tcpHandler.writeData("ref "+ this.remoteWorkingDir +"/"+cmd[2] + " " + this.remoteWorkingDir +"/"+cmd[3]);
                     output = "[Server]"+(String)tcpHandler.readData();
                     return output;
@@ -286,8 +322,16 @@ public class ClientCommands implements ICommands{
                     output = this.EditFileName(clientFileSystem.getWorkingDir()+"/"+cmd[1],clientFileSystem.getWorkingDir()+"/"+cmd[2]);
                     return output;
                 }
-            case NAME:
-                return this.changeName(cmd[1]);
+            /*case NAME:
+                return this.changeName(cmd[1]);*/
+            case LIST:
+                return client.getUdpHandler().sendRequest(new Msg(client.getClientName(),line));
+            case MSG:
+                return client.getUdpHandler().sendRequest(new Msg(client.getClientName(),line));
+            case USERS:
+                return client.getUdpHandler().sendRequest(new Msg(client.getClientName(),line));
+            case MSGTO:
+                return client.getUdpHandler().sendRequest(new Msg(client.getClientName(),line));
             default:
                 return "Unknown command, type help";
             
@@ -299,12 +343,12 @@ public class ClientCommands implements ICommands{
     public String Connect(String[] args) {
         
         try {
-            System.out.println("ENTREI AQUI: ip " + args[1] + " porto " + args[2]);
+            
             tcpHandler.connectToServer(InetAddress.getByName(args[1]), Integer.parseInt(args[2]));
-            System.out.println("LIGOU");
-            tcpHandler.writeData("Connect red");
+            
+            tcpHandler.writeData("Connect guest");
             output =(String)tcpHandler.readData();
-            this.remoteWorkingDir = output;
+            //this.remoteWorkingDir = output;
             //clientFileSystem.setWorkingDir(output);
             return "[Server]: "+ output ;
         } catch (UnknownHostException ex) {
@@ -317,7 +361,7 @@ public class ClientCommands implements ICommands{
     @Override
     public String ListFiles(String path) {
         output="";
-        if(tcpHandler.isOnline()){
+        if(tcpHandler.isOnline() && !this.client.getClientName().equalsIgnoreCase("guest")){
             //server.commands.upload
             //server.sendRequest
             String msg = "ls " + remoteWorkingDir;
@@ -379,5 +423,50 @@ public class ClientCommands implements ICommands{
             client.getHbSender().setHeartbeat(new Heartbeat(client.getUdpListener().getListeningPort(),client.getClientName()));
             return "Name set to " + client.getClientName();
         //} else client.reportError("Erro de sintaxe: nome <nome>");
+    }
+
+    @Override
+    public String Login(String user, String pass) {
+        client.getTcpHandler().writeData("LOGIN " + user+" "+pass );
+        output="[Server]"+(String)client.getTcpHandler().readData();
+        if(output.contains("Wrong")){
+            
+            return output;
+        }else{
+            this.client.setRemoteDir(output);
+            this.client.setClientName(user);
+            this.changeName(user);
+            output = "Logged in";
+            return output;
+        }
+    }
+
+    @Override
+    public String Logout(String user) {
+        client.getTcpHandler().writeData("LOGOUT " + user);
+        output="[Server]"+(String)client.getTcpHandler().readData();
+        if(output.contains("Error")){
+            
+            return output;
+        }else{
+            //tratar isto
+            this.client.setClientName("guest");
+            this.changeName("guest");
+            output = "Logged out";
+            return output;
+        }
+    }
+
+    @Override
+    public String Register(String user, String pass) {
+        client.getTcpHandler().writeData("REGISTER " + user+" "+pass );
+        output="[Server]"+(String)client.getTcpHandler().readData();
+        if(output.contains("Error")){
+            
+            return output;
+        }else{
+            
+            return output;
+        }
     }
 }

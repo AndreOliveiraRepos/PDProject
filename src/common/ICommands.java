@@ -11,7 +11,7 @@ package common;
  */
 
 public interface ICommands {
-    public static final String NAME = "NAME";
+    //public static final String NAME = "NAME";
     public static final String LIST = "LIST";
     public static final String MSG = "MSG";
     public static final String USERS = "USERS";
@@ -33,9 +33,9 @@ public interface ICommands {
     public static final String RENAMEFILE = "REF";
     
     String Connect(String[] args);
-    String Login();
-    String Logout();
-    String Register();
+    String Login(String user, String pass);
+    String Logout(String user);
+    String Register(String user, String pass);
     String Download(String path);
     String Upload(String path);
     String Move(String origin,String destiny);

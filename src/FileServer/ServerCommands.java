@@ -7,8 +7,17 @@ package FileServer;
 
 import common.FileSystem;
 import common.ICommands;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -18,32 +27,56 @@ public class ServerCommands implements ICommands {
     private FileSystem serverFileSystem;
     private String output;
     private ServerTCPHandler tcpHandler;
+    private FileServer fileServer;
     
-    public ServerCommands(FileSystem fs,ServerTCPHandler s){
+    public ServerCommands(FileSystem fs,ServerTCPHandler s, FileServer f){
         this.serverFileSystem = fs;
         this.tcpHandler = s;
         this.output = "";
+        this.fileServer = f;
     }
     
     @Override
     public String Connect(String[] args) {
-        output = this.serverFileSystem.getWorkingDir().replace("C:/","remote"+serverFileSystem.getName()+"/");
+        output = "Welcome";
         return output;
     }
 
     @Override
-    public String Login() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String Login(String user, String pass) {
+        if(fileServer.validateUser(user, pass)){
+            output = this.serverFileSystem.getWorkingDir().replace("C:/","remote"+serverFileSystem.getName()+"/");
+            //tcpHandler.writeData("User created!");
+            return output;
+        }
+        else{
+            //tcpHandler.writeData("User not created!");
+            return "Wrong credentials";
+        }
     }
 
     @Override
-    public String Logout() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String Logout(String user) {
+        if(fileServer.loggoutUser(user)){
+            //tcpHandler.writeData("User logged out!");
+            return "User logout";
+        }
+        else{
+            //tcpHandler.writeData("Cant logout!");
+            return "Error";
+        }
     }
 
     @Override
-    public String Register() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String Register(String user,String pass) {
+        if(fileServer.registerNewUser(user, pass)){
+            //tcpHandler.writeData("User created!");
+            return "New user registered";
+        }
+        else{
+            //tcpHandler.writeData("User not created!");
+            return "Error creating user";
+        }
     }
 
     @Override
@@ -154,11 +187,14 @@ public class ServerCommands implements ICommands {
                 }
                 
             case REGISTER:
-                return "Unknown command type help";
+                if(cmd.length > 2 && !cmd[1].isEmpty() && !cmd[2].isEmpty()){
+                    return this.Register(cmd[1], cmd[2]);
+                }
+                return "Wrong command";
             case LOGIN:
-                return "Unknown command type help";
+                return this.Login(cmd[1],cmd[2]);
             case LOGOUT:
-                return "Unknown command type help";
+                return this.Logout(cmd[1]);
             case MOVE:
                 if(cmd.length == 3){
                     
@@ -195,6 +231,7 @@ public class ServerCommands implements ICommands {
                 return this.EditFileName(cmd[1], cmd[2]);
             case RENAMEDIR:
                 return this.EditDirName(cmd[1], cmd[2]);
+            
             default:
                 return "Unknown command type help";
         }
@@ -263,5 +300,6 @@ public class ServerCommands implements ICommands {
         return output;
     }
 
-   
+    
+    
 }

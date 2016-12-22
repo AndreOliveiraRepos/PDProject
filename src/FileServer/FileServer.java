@@ -3,10 +3,14 @@ package FileServer;
 import common.FileObject;
 import common.FileSystem;
 import common.HeartbeatSender;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -39,14 +43,14 @@ class AtendeCliente extends Thread {
     ServerCommands serverCommands;
     ServerTCPHandler tcpHandler;
 
-    public AtendeCliente(Socket s, int id, String name, FileSystem fs){
+    public AtendeCliente(Socket s, int id, String name, FileSystem fs, FileServer f){
         tcpHandler = new ServerTCPHandler();
         tcpHandler.setSocket(s);
         myId = id;
         serverName = name;
         serverFileSystem = fs;
         listenning = true;
-        serverCommands = new ServerCommands(serverFileSystem,tcpHandler);
+        serverCommands = new ServerCommands(serverFileSystem,tcpHandler, f);
     }
     
     @Override
@@ -80,6 +84,7 @@ public class FileServer {
     
     private static ArrayList<String> connectedClients;
     private static FileSystem serverFileSystem;
+    private File registryFile;
     
     //directory
     
@@ -92,7 +97,7 @@ public class FileServer {
         connectedClients = new ArrayList<String>();
         online = true;
         serverFileSystem = new FileSystem(name);
-        
+        registryFile = new File("C:/temp/" + name + "Registry");
         try {
             //Gera porto automático TCP
             serverSocket = new ServerSocket(7001); //0 //7001
@@ -154,7 +159,7 @@ public class FileServer {
             while(online){
                 socketToClient = serverSocket.accept();
                 //System.out.println("ACEITEI");
-                (new AtendeCliente(socketToClient, threadId++, name, serverFileSystem)).start();
+                (new AtendeCliente(socketToClient, threadId++, name, serverFileSystem, this)).start();
             }
         } catch (IOException ex) {
             System.out.println("Ocorreu um erro ao criar o socket TCP! " + ex);
@@ -221,4 +226,80 @@ public class FileServer {
         }
     
     }
+    
+    public File getRegistryFile(){
+        return registryFile;
+    }
+    
+    public boolean validateUser(String user, String pass){
+        if(this.getConnectedClients().contains(user)){
+            
+            return false;
+            
+        }else{
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(this.getRegistryFile()));
+                String line = br.readLine();
+                System.out.println("LINHA"+line);
+                while (line != null) {
+                    if(line.contains(user)){
+                        String[] aux = line.split("\t");
+                        System.out.println("U: " + aux[0]+ "P:  " + aux[1]);
+                        if(aux[1].equalsIgnoreCase(pass)){
+                            this.getConnectedClients().add(user);
+                            
+                            return true;
+                        }
+                        else{
+                            
+                            return false;
+                        }
+                    }else{
+                        line = br.readLine();
+                    }
+                    
+                }
+                
+                return false;
+            
+            } catch (FileNotFoundException ex) {
+                //return "File not found";
+            } catch (IOException ex) {
+                //return  "Cannot read file!";
+            }
+        }
+        return false;
+    }
+    
+    public boolean loggoutUser(String user){
+        if(this.getConnectedClients().contains(user)){
+            for(int i = 0; i < this.getConnectedClients().size(); i++){
+                if(this.getConnectedClients().get(i).equalsIgnoreCase(user)){
+                    this.getConnectedClients().remove(i);
+                    
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean registerNewUser(String user, String pass){
+        String newUser = user + "\t" + pass;
+        try {
+            System.out.println("WRITING: "+newUser);
+            BufferedWriter bw = new BufferedWriter(new FileWriter(this.getRegistryFile(),true));
+            bw.write(newUser);
+            bw.newLine();
+            bw.flush();
+            bw.close();
+            return true;
+            
+        } catch (IOException ex) {
+            Logger.getLogger(ServerCommands.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        
+    }
+    
 }
