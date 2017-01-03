@@ -2,7 +2,7 @@ package ServerMonitor;
 
 import DirectoryService.ServerMonitorListener;
 import DirectoryService.RemoteServiceInterface;
-import DirectoryService.ServerEntry;
+import DirectoryService.Manager.ServerEntry;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;

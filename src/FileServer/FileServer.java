@@ -244,6 +244,7 @@ public class FileServer {
             
             FileServer fserver = new FileServer(serverName, dirAddr, dirPort);
             
+            //debug
             connectedClients.add("auth");
             
             //Inicializar heartbeat/Packets UDP

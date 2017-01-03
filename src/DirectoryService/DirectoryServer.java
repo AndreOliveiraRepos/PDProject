@@ -1,5 +1,8 @@
 package DirectoryService;
 
+import DirectoryService.Manager.ClientManager;
+import DirectoryService.Manager.ClientEntry;
+import DirectoryService.Manager.ServerManager;
 import FileServer.ServerHeartbeat;
 import common.Heartbeat;
 import common.Msg;
@@ -126,7 +129,7 @@ public class DirectoryServer {
                                 chatService.sendMessage(
                                     msg.getName() + ": " + message,
                                     client.getAddr(), client.getPort());
-                            } //else System.out.println("is NOT authenticated!");
+                            } else System.out.println("is NOT authenticated!");
                         }
                         udpListener.sendResponse("Mensagem de difusao enviada...");
                     }

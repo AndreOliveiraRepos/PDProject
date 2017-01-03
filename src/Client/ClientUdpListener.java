@@ -1,7 +1,7 @@
 package Client;
 
-import DirectoryService.ClientEntry;
-import DirectoryService.ServerEntry;
+import DirectoryService.Manager.ClientEntry;
+import DirectoryService.Manager.ServerEntry;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -79,6 +79,8 @@ public class ClientUdpListener extends Thread
                     System.out.println("Erro ao receber objecto no listener UDP!" + e);
                 }
             }
+        } catch (SocketException ex){
+            System.out.println("Socket UDP de escuta desligado! ");
         } catch (IOException ex) {
             System.out.println("Erro ao receber dados no socket UDP de escuta! " + ex);
         } catch (ClassNotFoundException ex) {
@@ -102,6 +104,11 @@ public class ClientUdpListener extends Thread
         listening = false;
     }
     
+    public void terminate(){
+        closeSocket();
+        stopListening();
+    }
+    
     public void dispatch(String s){
         controller.updateView(s);
     }
@@ -121,6 +128,6 @@ public class ClientUdpListener extends Thread
         for (ClientEntry c : clients){
             os.append(c.toString() + "\n");
         }
-        controller.updateUserList(output);
+        controller.updateUserList(os.toString());
     }
 }

@@ -1,4 +1,4 @@
-package DirectoryService;
+package DirectoryService.Manager;
 
 import FileServer.ServerHeartbeat;
 import java.io.Serializable;

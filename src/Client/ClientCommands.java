@@ -7,7 +7,11 @@ import common.Msg;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ClientCommands /*extends UnicastRemoteObject implements ServerMonitorListener*/{
     
@@ -128,7 +132,29 @@ public class ClientCommands /*extends UnicastRemoteObject implements ServerMonit
         return clientName;
     }
     
+    public void stopRMI(){
+        try {
+            if (rmiClient != null)
+                rmiClient.terminate();
+        } catch (RemoteException ex) {
+            System.out.println("Erro ao terminar cliente RMI!" + ex);
+        }
+    }
+    
     public void terminate(){
+        try {
+            if (rmiClient != null)
+                rmiClient.terminate();
+            if(rmiClient != null){
+            /* Termina o serviço local*/
+           try{
+               UnicastRemoteObject.unexportObject(rmiClient, true);
+           }catch(NoSuchObjectException e){}
+       }
+        } catch (RemoteException ex) {
+            System.out.println("Erro ao terminar o servico RMI! " + ex);
+        }
+        udpListener.terminate();
         udpHandler.closeSocket();
         tcpHandler.closeSocket();
     }

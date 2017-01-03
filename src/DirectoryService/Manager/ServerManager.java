@@ -1,7 +1,7 @@
 /*
  * Classe que gere os servidores activos.
  */
-package DirectoryService;
+package DirectoryService.Manager;
 
 import FileServer.ServerHeartbeat;
 import java.net.InetAddress;

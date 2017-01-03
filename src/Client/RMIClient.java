@@ -6,7 +6,7 @@
 package Client;
 
 import DirectoryService.RemoteServiceInterface;
-import DirectoryService.ServerEntry;
+import DirectoryService.Manager.ServerEntry;
 import DirectoryService.ServerMonitorListener;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -59,6 +59,11 @@ public class RMIClient extends UnicastRemoteObject implements ServerMonitorListe
     
     public RemoteServiceInterface getService(){
         return rmiService;
+    }
+    
+    public void terminate() throws RemoteException{
+        rmiService.removeObserver(this);
+        
     }
 
     @Override

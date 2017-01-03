@@ -1,6 +1,6 @@
 package Client;
 
-import DirectoryService.ServerEntry;
+import DirectoryService.Manager.ServerEntry;
 import common.Msg;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

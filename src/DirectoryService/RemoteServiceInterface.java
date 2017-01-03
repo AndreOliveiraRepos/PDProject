@@ -1,5 +1,6 @@
 package DirectoryService;
 
+import DirectoryService.Manager.ServerEntry;
 import java.util.ArrayList;
 
 public interface RemoteServiceInterface extends java.rmi.Remote{

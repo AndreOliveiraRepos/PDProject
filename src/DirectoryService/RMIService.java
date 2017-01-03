@@ -1,5 +1,7 @@
 package DirectoryService;
 
+import DirectoryService.Manager.ServerEntry;
+import DirectoryService.Manager.ServerManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -36,8 +38,11 @@ public class RMIService extends UnicastRemoteObject implements RemoteServiceInte
     
     public void notifyObservers() throws RemoteException{
         //System.out.println("Observadores: " + observers.size());
-        for (ServerMonitorListener observer : observers)
-            observer.printServers();
+        for (ServerMonitorListener observer : observers){
+            //if (observer.wait())
+            if (observer != null)
+                observer.printServers();
+        }
     }
 
     @Override

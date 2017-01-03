@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package DirectoryService;
+package DirectoryService.Manager;
 
 import common.Heartbeat;
 import java.net.InetAddress;

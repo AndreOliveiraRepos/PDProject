@@ -1,6 +1,6 @@
 package Client;
 
-import DirectoryService.ServerEntry;
+import DirectoryService.Manager.ServerEntry;
 import common.Msg;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -53,6 +53,7 @@ public class ClientUdpHandler{
             
             ByteArrayOutputStream baos;
             ObjectOutputStream oOut;
+            
             baos = new ByteArrayOutputStream();
             oOut = new ObjectOutputStream(baos);
             oOut.writeObject(msg);
