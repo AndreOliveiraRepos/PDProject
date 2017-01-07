@@ -43,9 +43,8 @@ public class FileSystem implements Serializable{
                 return "I/O error!";
             }
         }
-        
-        
     }
+    
     public String moveFile(String origin,String destiny){
         FileChannel ofc, dfc;
         File sourceFile = new File(origin);
