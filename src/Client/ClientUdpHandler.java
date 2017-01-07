@@ -12,9 +12,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ClientUdpHandler{
     public static final int MAX_SIZE = 1000;

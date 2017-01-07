@@ -1,4 +1,9 @@
-package Client;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package FileServer;
 
 import common.FileObject;
 import java.io.File;
@@ -11,41 +16,30 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class ClientTcpHandler {
+/**
+ *
+ * @author André Oliveira
+ */
+public class ServerTCPHandler {
     public static final int TIMEOUT = 5000; //5 segs
     
-    protected InetAddress serverAddress;
-    protected int serverPort;
-    protected Socket socketToServer;
+    
+    protected Socket socketToClient;
     private boolean online;
     
-    public ClientTcpHandler()
-    {
-        socketToServer = null;
+    public ServerTCPHandler(){
+        this.socketToClient = null;
     }
     
-    public boolean connectToServer(InetAddress servAddr, Integer servPort){
-        try {
-            if(socketToServer != null){
-                socketToServer.close();
-            }
-            socketToServer = new Socket(servAddr, servPort);
-            //socketToServer.setSoTimeout(TIMEOUT);
-            online = true;
-            return true;
-        } catch (IOException e) {
-            System.out.println("Ocorreu um erro no acesso ao socket TCP" + ":\n\t"+e);
-            return false;
-        }
+    public void setSocket(Socket s){
+        this.socketToClient = s;
     }
     
     public Object readData(){
         Object obj = null;
         try {
-            ObjectInputStream in = new ObjectInputStream(socketToServer.getInputStream());
+            ObjectInputStream in = new ObjectInputStream(socketToClient.getInputStream());
             obj = in.readObject();
         } catch (IOException ex) {
             System.out.println("Data access error:\n\t"+ex);
@@ -57,7 +51,7 @@ public class ClientTcpHandler {
     
     public void writeData(Object obj){
         try {
-            ObjectOutputStream out = new ObjectOutputStream(socketToServer.getOutputStream());
+            ObjectOutputStream out = new ObjectOutputStream(socketToClient.getOutputStream());
             out.writeObject(obj);
             out.flush();
         } catch (IOException ex) {
@@ -66,12 +60,12 @@ public class ClientTcpHandler {
        
     }
     
-    public  String sendFile(String path){
+    public String sendFile(String path){
         byte[] chunk = new byte[1024];
         int nbytes;
         FileObject fObj;
         try {
-            ObjectOutputStream oout = new ObjectOutputStream(socketToServer.getOutputStream());
+            ObjectOutputStream oout = new ObjectOutputStream(socketToClient.getOutputStream());
             FileInputStream fis = new FileInputStream(path);
             int count = 0;
             nbytes = fis.read(chunk);
@@ -94,7 +88,7 @@ public class ClientTcpHandler {
 
             fis.close();
             
-            return "File sent to server";
+            return "File sent to client";
         } catch (FileNotFoundException ex) {
             return "File not found";
         } catch (IOException ex) {
@@ -102,9 +96,8 @@ public class ClientTcpHandler {
         }
     }
     
-    public  String receiveFile(String path){
+    public String receiveFile(String path){
         File fileToWrite = new File(path);
-        System.out.println("CAMINHO:" + path);
         FileObject fObj;
         if(fileToWrite.exists()){
             return "File already exists";
@@ -112,12 +105,13 @@ public class ClientTcpHandler {
             System.out.println("Writing on " + path);
             try {
 
-                ObjectInputStream ois = new ObjectInputStream(socketToServer.getInputStream());
+                ObjectInputStream ois = new ObjectInputStream(socketToClient.getInputStream());
                 FileOutputStream fos = new FileOutputStream(fileToWrite);
                 int contador =0;
                 int nbytes;
                 //nbytes = fin.read(fileChunk);
                 while(true){                    
+
                     Object obj = ois.readObject();
                     // 
                     //System.out.println("Recebido o bloco n. " + ++contador + " com " + fObj.getnBytes() + " bytes.");
@@ -129,10 +123,6 @@ public class ClientTcpHandler {
                             break;
                         fos.write(fObj.getFileChunk(), 0, fObj.getnBytes());
                     }
-                    
-
-
-                    
                     //System.out.println("Acrescentados " + fObj.getnBytes() + " bytes ao ficheiro " + path+ ".");
 
                 }  
@@ -141,10 +131,10 @@ public class ClientTcpHandler {
                 fos.close();
                 //in.close();
                 //fos.close();
-                return "Received from server!";
+                return "Received from client!";
 
             } catch (FileNotFoundException ex) {
-                return "File not Found!";
+                return "AQUI?? File not Found!";
             } catch (IOException ex) {
                 return "Erros writing!";
             } catch (ClassNotFoundException ex) {
@@ -153,10 +143,11 @@ public class ClientTcpHandler {
         }
         
     }
+    
     public void closeSocket(){
-        if(socketToServer != null){
+        if(socketToClient != null){
             try {
-                socketToServer.close();
+                socketToClient.close();
             } catch (IOException ex) {}
         }
     }
@@ -164,4 +155,5 @@ public class ClientTcpHandler {
     public boolean isOnline(){
         return this.online;
     }
+
 }

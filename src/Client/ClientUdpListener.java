@@ -18,7 +18,7 @@ public class ClientUdpListener extends Thread
     private DatagramSocket socket;
     private DatagramPacket packet;
     
-    private ClientCommands controller;
+    private Client controller;
     
     private boolean listening;
     
@@ -27,7 +27,7 @@ public class ClientUdpListener extends Thread
     ArrayList<ServerEntry> servers;
     ArrayList<ClientEntry> clients;
     
-    public ClientUdpListener(ClientCommands c){
+    public ClientUdpListener(Client c){
         controller = c;
         
         try {
@@ -105,21 +105,22 @@ public class ClientUdpListener extends Thread
     }
     
     public void terminate(){
-        closeSocket();
         stopListening();
+        closeSocket();
     }
     
     public void dispatch(String s){
         controller.updateView(s);
     }
     
+    /* Por Corrigir */
     public void updateServerList(){
         StringBuilder os = new StringBuilder();
         os.append("Lista de servidores ligados: \n");
         for (ServerEntry s : servers){
             os.append("\t" + s.toString() + "\n");
         }
-        controller.updateServerList(os.toString());
+        //controller.updateServerList(os.toString());
     }
     
     public void updateUserList(){
@@ -128,6 +129,6 @@ public class ClientUdpListener extends Thread
         for (ClientEntry c : clients){
             os.append(c.toString() + "\n");
         }
-        controller.updateUserList(os.toString());
+        //controller.updateUserList(os.toString());
     }
 }
