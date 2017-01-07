@@ -36,7 +36,8 @@ public class ServerCommands implements ICommands {
     public String Login(String user, String pass) {
         if(fileServer.validateUser(user, pass)){
             
-            output = this.serverFileSystem.getWorkingDir().replace("C:/temp/"+this.fileServer.getName(),"remote"+serverFileSystem.getName()+"/");
+            output = this.serverFileSystem.getWorkingDir().replace("C:/temp/"+this.fileServer.getName(),"remote"+serverFileSystem.getName()+"/"+user);
+            System.out.println("CAMINHO ENVIADO:" + this.serverFileSystem.getWorkingDir().replace("C:/temp/"+this.fileServer.getName(),"remote"+serverFileSystem.getName()+"/"));
             //tcpHandler.writeData("User created!");
             return output;
         }
@@ -125,19 +126,19 @@ public class ServerCommands implements ICommands {
         if(cmd.length == 2){
             String rep;
             if(cmd[1].contains("remote"+serverFileSystem.getName())){
-                rep = cmd[1].replace("remote"+serverFileSystem.getName()+"/","C:/");
+                rep = cmd[1].replace("remote"+serverFileSystem.getName(),this.serverFileSystem.getWorkingDir());
                 cmd[1] = rep;
                
             }
         }else if(cmd.length < 4 && cmd.length > 2){
             String rep;
             if(cmd[1].contains("remote"+serverFileSystem.getName())){
-                rep = cmd[1].replace("remote"+serverFileSystem.getName()+"/","C:/");
+                rep = cmd[1].replace("remote"+serverFileSystem.getName(),this.serverFileSystem.getWorkingDir());
                 cmd[1] = rep;
                 
                 if(cmd[2].contains("remote"+serverFileSystem.getName())){
                     
-                    rep=cmd[2].replace("remote"+serverFileSystem.getName()+"/","C:/");
+                    rep=cmd[2].replace("remote"+serverFileSystem.getName(),this.serverFileSystem.getWorkingDir());
                     cmd[2] = rep;
                     
                 }
@@ -147,13 +148,13 @@ public class ServerCommands implements ICommands {
             
             String rep;
             if(cmd[1].contains("remote"+serverFileSystem.getName())){
-                rep = cmd[1].replace("remote"+serverFileSystem.getName()+"/","C:/");
+                rep = cmd[1].replace("remote"+serverFileSystem.getName(),this.serverFileSystem.getWorkingDir());
                 cmd[1] = rep;
                 
             }
             if(cmd[2].contains("remote"+serverFileSystem.getName())){
                     
-                    rep=cmd[2].replace("remote"+serverFileSystem.getName()+"/","C:/");
+                    rep=cmd[2].replace("remote"+serverFileSystem.getName(),this.serverFileSystem.getWorkingDir());
                     cmd[2] = rep;
                     System.out.println("CMD2"+cmd[2]);
             }
@@ -232,7 +233,7 @@ public class ServerCommands implements ICommands {
 
     @Override
     public String ListFiles(String path) {
-        System.out.println("CAMINHO LS:" + path);
+        System.out.println("CAMINHO LS Remoto: " + path);
         return serverFileSystem.listDirectoryContent(path);
     }
 

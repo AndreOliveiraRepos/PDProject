@@ -472,13 +472,14 @@ public class ClientCommands implements ICommands{
     @Override
     public String Login(String user, String pass) {
         client.getTcpHandler().writeData("LOGIN " + user+" "+pass );
-        output="[Server]"+(String)client.getTcpHandler().readData();
+        String path = (String)client.getTcpHandler().readData();
+        output="[Server]"+path;
         if(output.contains("Wrong")){
             
             return output;
         }else{
-            this.client.setRemoteDir(output);
-            System.out.println("OUT " + this.client.getRemoteDir());
+            this.client.setRemoteDir(path);
+            //System.out.println("OUT " + this.client.getRemoteDir());
             this.client.setClientName(user);
             this.changeName(user);
             output = "Logged in";

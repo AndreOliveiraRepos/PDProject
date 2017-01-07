@@ -98,6 +98,7 @@ public class FileServer {
         online = true;
         serverFileSystem = new FileSystem(name);
         serverFileSystem.makeDirectory("C:/temp/"+name);
+        serverFileSystem.setWorkingDir("C:/temp/"+name);
         registryFile = new File("C:/temp/" + name + "Registry");
         try {
             //Gera porto automático TCP

@@ -18,8 +18,8 @@ public class FileSystem implements Serializable{
     public FileSystem(String name){
         this.ownerName = name;
         //this.localHomeDir = "C:\\temp\\"+clientName;
-        this.localHomeDir = "C:/temp";
-        this.workingDirectory = this.localHomeDir + "/" + ownerName;   
+        this.localHomeDir = "C:/temp/";
+        this.workingDirectory = this.localHomeDir;   
     }
     //operators
     public String copyFile(String origin,String destiny){
@@ -135,8 +135,11 @@ public class FileSystem implements Serializable{
         }
     }
     public String listDirectoryContent(String path){
+        
         String output = "";
+        //System.out.println("CAMINHO LS antes folder: "+path + " fim");
         File folder = new File(path);
+        //System.out.println("CAMINHO LS FS: "+folder.getAbsolutePath() + " fim");
         if(folder.exists() && folder.isDirectory()){
             if(folder.listFiles().length > 0){
                 output+= "Listing current directory\n";
