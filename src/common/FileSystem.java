@@ -17,9 +17,20 @@ public class FileSystem implements Serializable{
 
     public FileSystem(String name){
         this.ownerName = name;
-        //this.localHomeDir = "C:\\temp\\"+clientName;
         this.localHomeDir = "/temp/";
-        this.workingDirectory = this.localHomeDir;   
+        File localdir = new File(this.localHomeDir);
+        //this.localHomeDir = "C:\\temp\\"+clientName;
+        if(!localdir.exists()){
+            localdir.mkdir();
+            this.workingDirectory = this.localHomeDir;   
+            
+        }
+        else{
+            
+           this.workingDirectory = this.localHomeDir;   
+        }
+        
+        
     }
     //operators
     public String copyFile(String origin,String destiny){
