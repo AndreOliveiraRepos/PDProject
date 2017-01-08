@@ -33,7 +33,6 @@ public class FileServerUI {
                 System.out.println("Erro: Já existe um servidor ligado com o mesmo nome!");
             }
             //Inicializar heartbeat/Packets UDP
-            
               
         } catch (UnknownHostException ex) {
             System.out.println("Destino desconhecido:\n\t"+ex);
