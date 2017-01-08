@@ -2,13 +2,20 @@ package FileServer;
 
 import common.FileSystem;
 import common.HeartbeatSender;
+import common.Msg;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -82,6 +89,7 @@ public class FileServer {
         directoryServerPort = dirPort;
         threadId = 0;
         name = n;
+        
         connectedClients = new ArrayList<String>();
         online = true;
         serverFileSystem = new FileSystem(name);
@@ -94,6 +102,7 @@ public class FileServer {
         } catch (IOException ex) {
             System.out.println("Ocorreu um erro no acesso ao socket:\n\t"+ex);
         }
+        
     }
 
     public static String getName() {
@@ -131,10 +140,7 @@ public class FileServer {
     }
     
     public void goOnline(){
-        this.startHearbeat();
-        
-        
-        
+        this.startHearbeat();   
     }
     
     public void processRequests(){
@@ -286,7 +292,33 @@ public class FileServer {
             Logger.getLogger(ServerCommands.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
-        
+    }
+    
+    public boolean isDuplicatedName(String name, InetAddress addr, int port){
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oOut = new ObjectOutputStream(baos);
+            oOut.writeObject(new Msg(name, "SERVER_AUTH"));
+            oOut.flush();
+            DatagramPacket packet = new DatagramPacket(baos.toByteArray(), baos.size(), addr, port);
+            socket.send(packet);
+            
+            packet = new DatagramPacket(new byte[512], 512);
+            socket.receive(packet);
+            ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
+            Object obj = in.readObject();
+            if (obj instanceof Integer){
+                Integer i = (Integer) obj;
+                return !(i.equals(1));
+            } else System.out.println("Objecto recebido no socket UDP do tipo inesperado! ");
+            
+        } catch (IOException ex) {
+            System.out.println("[Socket UDP] Erro ao enviar pedido ao servico de directoria!" + ex);
+        } catch (ClassNotFoundException ex) {
+            System.out.println("Objecto recebido no socket UDP do tipo inesperado! " + ex);
+        }
+        return true;
     }
     
 }

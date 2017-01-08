@@ -35,13 +35,9 @@ public class Client /*extends UnicastRemoteObject implements ServerMonitorListen
         this.directoryServerAddr = dirServerAddr;
         this.directoryServerPort = dirServerPort;
         udpHandler = new ClientUdpHandler(directoryServerAddr, directoryServerPort);
-        //isto pra metodo
-        udpListener = new ClientUdpListener(this);
-        udpListener.start();
         
         tcpHandler = new ClientTcpHandler();
         clientFileSystem = new FileSystem(clientName);
-        
         
         this.clientName = "guest";
         this.view = v;
@@ -51,12 +47,13 @@ public class Client /*extends UnicastRemoteObject implements ServerMonitorListen
        // tcpHandler = new ClientTcpHandler();
         //hbSender = null;
         clientCommands = new ClientCommands(clientFileSystem,tcpHandler,this);
-        
     }
     
     public void goOnline(){
+        udpListener = new ClientUdpListener(this);
+        udpListener.start();
         this.startHearbeat();
-        this.online = true;
+        this.online = true; 
     }
     
     public void startHearbeat(){
@@ -79,7 +76,6 @@ public class Client /*extends UnicastRemoteObject implements ServerMonitorListen
         
         return "-";
     }
-    
     
     public ClientCommands getClientCommand(){
         return this.clientCommands;
@@ -193,7 +189,5 @@ public class Client /*extends UnicastRemoteObject implements ServerMonitorListen
     
     public void setRemoteDir(String path){
         this.remoteWorkingDir = path;
-    }
-    
-    
+    } 
 }

@@ -5,7 +5,6 @@
  */
 package FileServer;
 
-import common.HeartbeatSender;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -23,17 +22,20 @@ public class FileServerUI {
             return;
         }
         
-        //Liga ao serviço de directoria e vê se não existe mais nenhum servidor com o mesmo nome
-            
+        //Liga ao serviço de directoria e vê se não existe mais nenhum servidor com o mesmo nome    
+        
         try {    
-            FileServer fserver = new FileServer(args[0],
-                    InetAddress.getByName(args[1]),
-                    Integer.parseInt(args[2])
-            );
+            String serverName = args[0];
+            InetAddress dirAddr = InetAddress.getByName(args[1]);
+            Integer dirPort = Integer.parseInt(args[2]);
             
+            FileServer fserver = new FileServer(serverName, dirAddr, dirPort);
             
-            fserver.goOnline();
-            
+            if (!fserver.isDuplicatedName(serverName,dirAddr,dirPort)){
+                fserver.goOnline();
+            } else {
+                System.out.println("Erro: Já existe um servidor ligado com o mesmo nome!");
+            }
             //Inicializar heartbeat/Packets UDP
             
               

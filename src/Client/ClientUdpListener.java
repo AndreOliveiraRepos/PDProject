@@ -53,11 +53,11 @@ public class ClientUdpListener extends Thread
                 in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
                 obj = in.readObject();
 
-                if (obj instanceof String){
+                /*if (obj instanceof String){
                     //System.out.println("Recebi: " + (String)obj);
                     output = (String)obj;
                     updateServerList();
-                } else dispatch("Objecto recebido no socket UDP do tipo inesperado! ");
+                } else dispatch("Objecto recebido no socket UDP do tipo inesperado! ");*/
                 try
                 {
                     if(obj instanceof ArrayList<?>)
