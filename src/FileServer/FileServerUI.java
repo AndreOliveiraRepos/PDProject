@@ -8,10 +8,6 @@ package FileServer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-/**
- *
- * @author André Oliveira
- */
 public class FileServerUI {
     
     public static void main(String[] args) {

@@ -7,8 +7,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class HeartbeatSender<T> extends Thread{
     private T heartbeat;
@@ -39,7 +37,7 @@ public class HeartbeatSender<T> extends Thread{
         }
     }
     
-    public HeartbeatSender(InetAddress serverAddr, int serverPort){
+    /*public HeartbeatSender(InetAddress serverAddr, int serverPort){
         this.serverAddr = serverAddr;
         this.serverPort = serverPort;
         
@@ -51,7 +49,7 @@ public class HeartbeatSender<T> extends Thread{
         } catch (SocketException ex) {
             System.out.println("Erro ao iniciar o envio de Heartbeat!");
         }
-    }
+    }*/
     
     public void terminate(){
         running = false;

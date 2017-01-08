@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
-
 class AtendeCliente extends Thread {
     
     public static final int MAX_SIZE = 4000;
@@ -61,8 +59,6 @@ class AtendeCliente extends Thread {
         }
         tcpHandler.closeSocket();
     }
-    
-    
 }
 
 public class FileServer {
@@ -205,13 +201,15 @@ public class FileServer {
     public void startHearbeat(){
         try {
             this.online = true;
-            hbSender = new HeartbeatSender<ServerHeartbeat>(directoryServerAddr, directoryServerPort);
+            hbSender = new HeartbeatSender<ServerHeartbeat>(
+                    new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients),
+                    directoryServerAddr, directoryServerPort);
             hbSender.setDaemon(true);
             hbSender.start();
 
-            hbSender.setHeartbeat(
+            /*hbSender.setHeartbeat(
                 new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients)
-            );
+            );*/
             processRequests();
            
         

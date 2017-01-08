@@ -9,10 +9,6 @@ import common.FileSystem;
 import common.ICommands;
 import java.io.File;
 
-/**
- *
- * @author André Oliveira
- */
 public class ServerCommands implements ICommands {
     private FileSystem serverFileSystem;
     private String output;

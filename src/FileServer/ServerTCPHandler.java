@@ -13,14 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.file.Paths;
 
-/**
- *
- * @author André Oliveira
- */
 public class ServerTCPHandler {
     public static final int TIMEOUT = 5000; //5 segs
     

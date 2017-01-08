@@ -13,10 +13,6 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-/**
- *
- * @author André Oliveira
- */
 public class ClientCommands implements ICommands{
     
     private FileSystem clientFileSystem;

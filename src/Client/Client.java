@@ -4,7 +4,6 @@ import DirectoryService.RemoteServiceInterface;
 import common.FileSystem;
 import common.Heartbeat;
 import common.HeartbeatSender;
-import common.Msg;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

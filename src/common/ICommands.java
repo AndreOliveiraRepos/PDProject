@@ -5,11 +5,6 @@
  */
 package common;
 
-/**
- *
- * @author André Oliveira
- */
-
 public interface ICommands {
     //public static final String NAME = "NAME";
     public static final String LIST = "LIST";
@@ -50,7 +45,5 @@ public interface ICommands {
     String ChangeDirectory(String folder);
     String BackDirectory(String currentPath);
     String RenameDirectory(String path,String newName);
-    String RenameFile(String path, String newName);
-    
-    
+    String RenameFile(String path, String newName);    
 }

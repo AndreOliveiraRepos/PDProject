@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Heartbeat implements Serializable
 {
+    static final long serialVersionUID = 1010L;
+    
     private final int port;
     private String name;
     
