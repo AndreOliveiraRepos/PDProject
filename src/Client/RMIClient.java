@@ -25,15 +25,17 @@ public class RMIClient extends UnicastRemoteObject implements ServerMonitorListe
     private String addr;
     private int port;
     private Client commands;
+    private ClientUI view;
     
     RemoteServiceInterface rmiService;
     String output;
 
-    public RMIClient(String addr, int port, Client cmd) throws RemoteException
+    public RMIClient(ClientUI v, String addr, int port, Client cmd) throws RemoteException
     {
         this.addr = addr;
         this.port = port;
         this.commands = cmd;
+        this.view = v;
     }
     
     @Override
@@ -87,7 +89,7 @@ public class RMIClient extends UnicastRemoteObject implements ServerMonitorListe
             }
             else output = "";
             //System.out.println(output);
-            //commands.updateServerList(output);
+            view.printContent(output);
             
         }
     }

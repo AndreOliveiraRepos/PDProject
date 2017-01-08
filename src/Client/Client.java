@@ -72,7 +72,7 @@ public class Client /*extends UnicastRemoteObject implements ServerMonitorListen
         
         if (rmiClient == null){
             System.out.println("Servico rmi iniciado! ");
-            this.rmiClient = new RMIClient(directoryServerAddr.getHostAddress() ,directoryServerPort, this);
+            this.rmiClient = new RMIClient(view,directoryServerAddr.getHostAddress() ,directoryServerPort, this);
             rmiClient.run();
         }
         clientCommands.Process(msg);

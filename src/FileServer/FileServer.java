@@ -1,26 +1,17 @@
 package FileServer;
 
-import common.FileObject;
 import common.FileSystem;
 import common.HeartbeatSender;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,9 +21,6 @@ import java.util.logging.Logger;
 class AtendeCliente extends Thread {
     
     public static final int MAX_SIZE = 4000;
-    
-    
-   
     
     public static boolean listenning;
     
@@ -235,7 +223,6 @@ public class FileServer {
     
     public boolean validateUser(String user, String pass){
         if(this.getConnectedClients().contains(user)){
-            
             return false;
             
         }else{
@@ -249,11 +236,9 @@ public class FileServer {
                         System.out.println("U: " + aux[0]+ "P:  " + aux[1]);
                         if(aux[1].equalsIgnoreCase(pass)){
                             this.getConnectedClients().add(user);
-                            
                             return true;
                         }
                         else{
-                            
                             return false;
                         }
                     }else{

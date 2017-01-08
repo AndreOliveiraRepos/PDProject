@@ -10,9 +10,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ClientTcpHandler {
     public static final int TIMEOUT = 5000; //5 segs
@@ -63,7 +60,6 @@ public class ClientTcpHandler {
         } catch (IOException ex) {
             System.out.println("Data access error:\n\t"+ex);
         }
-       
     }
     
     public  String sendFile(String path){

@@ -18,7 +18,7 @@ public class ClientUdpListener extends Thread
     private DatagramSocket socket;
     private DatagramPacket packet;
     
-    private Client controller;
+    private Client model;
     
     private boolean listening;
     
@@ -28,7 +28,7 @@ public class ClientUdpListener extends Thread
     ArrayList<ClientEntry> clients;
     
     public ClientUdpListener(Client c){
-        controller = c;
+        model = c;
         
         try {
             socket = new DatagramSocket();
@@ -53,11 +53,11 @@ public class ClientUdpListener extends Thread
                 in = new ObjectInputStream(new ByteArrayInputStream(packet.getData(), 0, packet.getLength()));
                 obj = in.readObject();
 
-                /*if (obj instanceof String){
+                if (obj instanceof String){
                     //System.out.println("Recebi: " + (String)obj);
                     output = (String)obj;
                     updateServerList();
-                } else dispatch("Objecto recebido no socket UDP do tipo inesperado! ");*/
+                } else dispatch("Objecto recebido no socket UDP do tipo inesperado! ");
                 try
                 {
                     if(obj instanceof ArrayList<?>)
@@ -110,7 +110,7 @@ public class ClientUdpListener extends Thread
     }
     
     public void dispatch(String s){
-        controller.updateView(s);
+        model.updateView(s);
     }
     
     /* Por Corrigir */
@@ -121,6 +121,7 @@ public class ClientUdpListener extends Thread
             os.append("\t" + s.toString() + "\n");
         }
         //controller.updateServerList(os.toString());
+        model.updateView(os.toString());
     }
     
     public void updateUserList(){
@@ -130,5 +131,6 @@ public class ClientUdpListener extends Thread
             os.append(c.toString() + "\n");
         }
         //controller.updateUserList(os.toString());
+        model.updateView(os.toString());
     }
 }
