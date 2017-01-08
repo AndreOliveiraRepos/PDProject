@@ -55,6 +55,13 @@ public class ServerManager extends Thread
                     double timestampSeconds = (double)entry.getValue().getTimestamp() / 1000000000.0;
                     double systemSeconds = (double)System.nanoTime() / 1000000000.0;
                     System.out.print("\t Ultimo hb: "+(systemSeconds - timestampSeconds)+ " segundos.\n");
+                    
+                    System.out.print("Clients: { ");
+                    for(String client : entry.getValue().getConnectedClients()){
+                        System.out.print(client + " ");
+                    }
+                    System.out.println("}\n");
+                    
                     if((systemSeconds - timestampSeconds) > ACCEPTED_INTERVAL){
                         it.remove();
                         hasChanges = true;

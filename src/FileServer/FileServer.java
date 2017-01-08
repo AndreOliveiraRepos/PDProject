@@ -242,6 +242,7 @@ public class FileServer {
                         System.out.println("U: " + aux[0]+ "P:  " + aux[1]);
                         if(aux[1].equalsIgnoreCase(pass)){
                             this.getConnectedClients().add(user);
+                            hbSender.setHeartbeat(new ServerHeartbeat(serverSocket.getLocalPort(),name,connectedClients));
                             return true;
                         }
                         else{
@@ -250,7 +251,6 @@ public class FileServer {
                     }else{
                         line = br.readLine();
                     }
-                    
                 }
                 
                 return false;
