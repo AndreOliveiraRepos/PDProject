@@ -26,6 +26,7 @@ public class FileSystem implements Serializable{
         FileChannel ofc, dfc;
         File sourceFile = new File(origin);
         destiny+="/"+sourceFile.getName();
+        //destiny+="\\"+sourceFile.getName();
         File destinyFile = new File(destiny);
         if(destinyFile.exists())
             return "File already exists";
@@ -49,6 +50,7 @@ public class FileSystem implements Serializable{
         FileChannel ofc, dfc;
         File sourceFile = new File(origin);
         destiny+="/"+sourceFile.getName();
+        //destiny+="\\"+sourceFile.getName();
         File destinyFile = new File(destiny);
         if(destinyFile.exists())
             return "File already exists";
@@ -212,6 +214,7 @@ public class FileSystem implements Serializable{
     }
     public String changeDir(String folder){
         File folderToGo = new File(this.workingDirectory+"/"+folder);
+        //File folderToGo = new File(this.workingDirectory+"\\"+folder);
         if (folderToGo.exists() && folderToGo.isDirectory()) {
            
                 
@@ -229,6 +232,7 @@ public class FileSystem implements Serializable{
         String resposta;
         resposta = "";
         String[] npath = currentDir.split("/");
+        //String[] npath = currentDir.split("\\");
         System.out.println("N CAMINHO" + npath.length+"\n"+npath);
         if(npath.length < 2){
                                 
@@ -241,6 +245,7 @@ public class FileSystem implements Serializable{
             for(int i = 0;i < npath.length-1;i++){
 
                 resposta+= npath[i] + "/";
+                //resposta+= npath[i] + "\\";
             }
             this.workingDirectory = resposta;
             return resposta;

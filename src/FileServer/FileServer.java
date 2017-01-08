@@ -92,6 +92,10 @@ public class FileServer {
         serverFileSystem.makeDirectory("C:/temp/"+name);
         serverFileSystem.setWorkingDir("C:/temp/"+name);
         registryFile = new File("C:/temp/" + name + "Registry");
+        if (!registryFile.exists()){
+            serverFileSystem.makeDirectory("C:/temp/" + name + "Registry");
+        }
+        
         try {
             //Gera porto automático TCP
             serverSocket = new ServerSocket(0); //0 //7001
