@@ -120,7 +120,6 @@ public class ClientUdpListener extends Thread
         for (ServerEntry s : servers){
             os.append("\t" + s.toString() + "\n");
         }
-        //controller.updateServerList(os.toString());
         model.updateView(os.toString());
     }
     
@@ -130,7 +129,6 @@ public class ClientUdpListener extends Thread
         for (ClientEntry c : clients){
             os.append(c.toString() + "\n");
         }
-        //controller.updateUserList(os.toString());
         model.updateView(os.toString());
     }
 }

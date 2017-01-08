@@ -12,23 +12,12 @@ import common.Msg;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.rmi.NoSuchObjectException;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 
 /**
  *
  * @author André Oliveira
  */
 public class ClientCommands implements ICommands{
-    //private static final String NAME = "NAME";
-    private static final String LIST = "LIST";
-    private static final String MSG = "MSG";
-    private static final String USERS = "USERS";
-    private static final String MSGTO = "MSGTO";
     
     private FileSystem clientFileSystem;
     //debug only
@@ -50,9 +39,6 @@ public class ClientCommands implements ICommands{
         //remoteWorkingDir = "remoteserver1/temp";
         this.lastCommand = "";
     }
-
-    
-    
 
     @Override
     public String Download(String path) {
@@ -337,9 +323,7 @@ public class ClientCommands implements ICommands{
                 return client.getUdpHandler().sendRequest(new Msg(client.getClientName(),line));
             default:
                 return "Unknown command, type help";
-            
         }
-        
     }
 
     @Override
@@ -357,8 +341,6 @@ public class ClientCommands implements ICommands{
         } catch (UnknownHostException ex) {
             return "Unknown Host";
         }
-        
-        
     }
 
     @Override
@@ -375,7 +357,6 @@ public class ClientCommands implements ICommands{
         }else {
             output += clientFileSystem.listDirectoryContent(path);
         }
-        
         return output;
     }
 
@@ -383,8 +364,6 @@ public class ClientCommands implements ICommands{
     public String MakeDirectory(String path) {
         
         output = clientFileSystem.makeDirectory(path);
-        
-        
         return output;
     }
 
@@ -392,7 +371,6 @@ public class ClientCommands implements ICommands{
     public String CatFile(String path) {
         System.out.println("PATH: " + path);
         output = clientFileSystem.fileCat(path);
-        
         return output;
     }
     
@@ -420,37 +398,9 @@ public class ClientCommands implements ICommands{
         return output;
     }
     
-    /*public void updateServerList(String servers){
-        if (lastCommand.equalsIgnoreCase(LIST))
-            view.printContent(servers);
-    }
-    
-    public void updateUserList(String users){
-        if (lastCommand.equalsIgnoreCase(USERS)){
-            view.printContent(users);
-        }
-    }
-    
-    public void reportError(String e){
-        view.printError(e);
-    }*/
-    
-    /*public RemoteServiceInterface getRmiService(){
-        return rmiClient.getService();
-    }*/
-    
     public String getClientName(){
         return clientName;
     }
-    
-    /*public void stopRMI(){
-        try {
-            if (rmiClient != null)
-                rmiClient.terminate();
-        } catch (RemoteException ex) {
-            System.out.println("Erro ao terminar cliente RMI!" + ex);
-        }
-    }*/
     
     public void terminate(){
         this.client.terminate();
