@@ -93,7 +93,12 @@ public class FileServer {
         serverFileSystem.setWorkingDir("C:/temp/"+name);
         registryFile = new File("C:/temp/" + name + "Registry");
         if (!registryFile.exists()){
-            serverFileSystem.makeDirectory("C:/temp/" + name + "Registry");
+            try {
+                registryFile.createNewFile();
+            } catch (IOException ex) {
+                System.out.println("Erro ao criar o ficheiro de registo\n\t"+ex);
+            }
+            
         }
         
         try {
@@ -226,6 +231,7 @@ public class FileServer {
     }
     
     public File getRegistryFile(){
+        
         return registryFile;
     }
     
